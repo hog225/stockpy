@@ -1,0 +1,7 @@
+<h2>선택 오브 종목</h2>
+<form method="post" action="">
+    {% csrf_token %}
+    {{ m_form.as_p }}
+    {{ t_form.as_p }}
+    <input type="submit" value="측정 고고" />
+</form>

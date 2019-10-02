@@ -1,0 +1,18 @@
+[
+  {
+    "model": "stocks.market",
+    "pk": 1,
+    "fields": {
+      "market_name": "Kospi"
+    }
+  },
+  {
+    "model": "stocks.techanal",
+    "pk": 1,
+    "fields": {
+      "tech_anal_name": "존버"
+    }
+  }
+
+
+]

@@ -1,8 +1,14 @@
 # Environment
     Ubuntu 18.04.3 LTS, python 3.6.8, Django
-    Make virtualenv : python3 -m virtualenv spvenv
-    Run Virtualenv : . activeVenv.sh
+    Make virtualenv : python3 -m venv spvenv
+    Run Virtualenv : . activeVenv.sh (source spvenv/bin/activate)
     insall Package : pip install -r requirements.txt
+    make config.cfg and edit
+    APP DB:
+        - python manage.py makemigrations stocks
+    DB Commit: python manage.py migrate
+    APP DB Init: python manage.py loaddata stocks_db_init.json 
+    
     
 # Django
     초기시작 : django-admin startproject stockpy
