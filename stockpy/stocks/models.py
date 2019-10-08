@@ -34,12 +34,3 @@ class StockValue(models.Model):
     update_date = models.DateTimeField()
 
 
-
-
-class MarketForm(forms.Form):
-    market_name = forms.ModelChoiceField(queryset=Market.objects.all())
-
-
-
-class TechAnalForm(forms.Form):
-    tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all())

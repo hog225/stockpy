@@ -1,7 +1,37 @@
+{% extends 'stocks/base.html' %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.2.2/dist/latest/bootstrap-autocomplete.min.js"></script>
+    <script>
+        $('.basicAutoComplete').autoComplete(
+            {minLength: 1}
+        );
+        $('.dropdown-menu').css({'top': 'auto', 'left': 'auto'})
+
+    </script>
+{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
 <h2>선택 오브 종목</h2>
-<form method="post" action="">
+<form method="post" action=".">
     {% csrf_token %}
-    {{ m_form.as_p }}
-    {{ t_form.as_p }}
-    <input type="submit" value="측정 고고" />
+    <div class="row">
+      <div class="col-6">
+        {{ form.market_name|as_crispy_field }}
+      </div>
+      <div class="col-6">
+        {{ form.tech_anal_name|as_crispy_field }}
+      </div>
+      <div class="col-12">
+          {% if field.name == "stock_name" %}
+            {% render_field field class="basicAutoComplete form-control" %}
+          {% endif %}
+        <!--{{ form.stock_name|as_crispy_field }}-->
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">측정고고</button>
 </form>
+{% endblock %}
