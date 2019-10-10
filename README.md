@@ -37,7 +37,8 @@
     - pip install mysqlclient, configparser
     - Edit config.cfg (settings.py/DATABASE)
     
-# bootstrap
+# Jquery/bootstrap 
     - crispy forms install requirments.txt에 포함 -> setting.py 변경
+    - Jquery WEB site에서 Jquery 다운 
     - https://getbootstrap.com 에서 Compiled CSS and JS 다운 
     - stocks/static 에다 css, js 파일 이동

@@ -1,34 +1,41 @@
 {% extends 'stocks/base.html' %}
 
-{% block script %}
+<!--템플릿 라이브러리 로딩 -->
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block scripts %}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript">
         $(function() {
-            var availableCity = ["서울","부산","대구","광주","울산"];
-            $(".basicAutoComplete").autocomplete({
-                source: availableCity,
+
+            $(".stockNameAutoComplete").autocomplete({
+                source: function(request, response) {
+                    $.getJSON("/stocks/stock-name-autocomplete", { q: request.term }, response);
+                },
                 select: function(event, ui) {
                     console.log(ui.item);
                 },
-                focus: function(event, ui) {
-                    return false;
-                    //event.preventDefault();
-                }
+
             });
+            $("#id_market_name").change(function () {
+                var selectedVal = $(this).val();
+                if (selectedVal != ''){
+                    $(".stockNameAutoComplete").removeAttr('disabled')
+                }
+
+
+
+            })
         });
     </script>
-
 
 {% endblock %}
 
 
 
 
-<!--템플릿 라이브러리 로딩 -->
-{% load crispy_forms_tags %}
-{% load widget_tweaks %}
 
 
 {% block content %}
