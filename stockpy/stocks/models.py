@@ -22,6 +22,9 @@ class Stock(models.Model):
     stock_code = models.CharField(max_length=50)
     f_market = models.ForeignKey(Market, on_delete=models.CASCADE, related_name='stock')
 
+    def __str__(self):
+        return self.stock_name
+
 class StockValue(models.Model):
     f_stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='stockvalue', null=True)
     high = models.FloatField()

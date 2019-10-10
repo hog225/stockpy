@@ -1,17 +1,35 @@
 {% extends 'stocks/base.html' %}
 
 {% block script %}
-    <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.2.2/dist/latest/bootstrap-autocomplete.min.js"></script>
-    <script>
-        $('.basicAutoComplete').autoComplete(
-            {minLength: 1}
-        );
-        $('.dropdown-menu').css({'top': 'auto', 'left': 'auto'})
-
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            var availableCity = ["서울","부산","대구","광주","울산"];
+            $(".basicAutoComplete").autocomplete({
+                source: availableCity,
+                select: function(event, ui) {
+                    console.log(ui.item);
+                },
+                focus: function(event, ui) {
+                    return false;
+                    //event.preventDefault();
+                }
+            });
+        });
     </script>
+
+
 {% endblock %}
 
+
+
+
+<!--템플릿 라이브러리 로딩 -->
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
 
 {% block content %}
 <h2>선택 오브 종목</h2>
@@ -25,13 +43,12 @@
         {{ form.tech_anal_name|as_crispy_field }}
       </div>
       <div class="col-12">
-          {% if field.name == "stock_name" %}
-            {% render_field field class="basicAutoComplete form-control" %}
-          {% endif %}
-        <!--{{ form.stock_name|as_crispy_field }}-->
+        {{ form.stock_name|as_crispy_field }}
       </div>
     </div>
 
     <button type="submit" class="btn btn-success">측정고고</button>
 </form>
 {% endblock %}
+
+
