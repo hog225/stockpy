@@ -7,12 +7,16 @@ from django import forms
 
 class Market(models.Model):
     market_name = models.CharField(max_length=25)
+    pub_date = models.DateTimeField('date published', auto_now_add=True, null=True)
+    update_date = models.DateTimeField('data updated', auto_now=True, null=True)
 
     def __str__(self):
         return self.market_name
 
 class TechAnal(models.Model):
     tech_anal_name = models.CharField(max_length=50)
+    pub_date = models.DateTimeField('date published', auto_now_add=True, null=True)
+    update_date = models.DateTimeField('data updated', auto_now=True, null=True)
 
     def __str__(self):
         return self.tech_anal_name
@@ -21,6 +25,8 @@ class Stock(models.Model):
     stock_name = models.CharField(max_length=50)
     stock_code = models.CharField(max_length=50)
     f_market = models.ForeignKey(Market, on_delete=models.CASCADE, related_name='stock')
+    pub_date = models.DateTimeField('date published', auto_now_add=True, null=True)
+    update_date = models.DateTimeField('data updated', auto_now=True, null=True)
 
     def __str__(self):
         return self.stock_name
@@ -34,6 +40,7 @@ class StockValue(models.Model):
     adj_close = models.FloatField()
     volume = models.IntegerField()
     date = models.DateTimeField()
-    update_date = models.DateTimeField()
+    pub_date = models.DateTimeField('date published', auto_now_add=True, null=True)
+    update_date = models.DateTimeField('data updated', auto_now=True, null=True)
 
 

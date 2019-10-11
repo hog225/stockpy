@@ -38,6 +38,7 @@
     - Edit config.cfg (settings.py/DATABASE)
     
 # Jquery/bootstrap 
+    - getStatic.sh 실행시켜 설치 
     - crispy forms install requirments.txt에 포함 -> setting.py 변경
     - Jquery WEB site에서 Jquery 다운 
     - https://getbootstrap.com 에서 Compiled CSS and JS 다운 

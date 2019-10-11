@@ -23,19 +23,30 @@
                 var selectedVal = $(this).val();
                 if (selectedVal != ''){
                     $(".stockNameAutoComplete").removeAttr('disabled')
+                    $.ajax({
+                        url:"{% url 'marketSelectAjax' %}",
+                        dataType:'json',
+                        type:'POST',
+                        data:{'selectedVal':selectedVal, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+                        success:function(result){
+                            console.log(result)
+                            $('#selectResult').text("Selected Market : " + result['selectedVal']);
+                        }
+                    });
+                }
+                else{
+                    $(".stockNameAutoComplete").attr({
+                        'disabled':'disabled',
+                    })
+                    $('#selectResult').text('');
                 }
 
 
-
-            })
+            });
         });
     </script>
 
 {% endblock %}
-
-
-
-
 
 
 {% block content %}
@@ -52,9 +63,26 @@
       <div class="col-12">
         {{ form.stock_name|as_crispy_field }}
       </div>
+
+        <div class="col-12">
+            <p id="selectResult"></p>
+      </div>
     </div>
 
     <button type="submit" class="btn btn-success">측정고고</button>
+
+</form>
+<hr class="mt-0 mb-4">
+<form method="post" action="admin">
+    {% csrf_token %}
+    <div class="row">
+
+    </div>
+    {% if user.is_authenticated and user.is_superuser %}
+        <button type="submit" class="btn btn-success">GetStockCode</button>
+    {% else %}
+        <button type="submit" class="btn btn-success" style="display: none;">GetStockCode</button>
+    {% endif %}
 </form>
 {% endblock %}
 
