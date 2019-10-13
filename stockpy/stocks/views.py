@@ -37,6 +37,7 @@ def updateStockCode(request):
                 m_obj.save()
 
         # 시장별 주식 종목 정보 데이터 저장
+        print('Save Market Data')
         for market in markets:
             market_name = [*market][0]
             q_mkt_name = market[market_name]
@@ -78,18 +79,20 @@ def updateStockCode(request):
                         vf_listed_date=stockVFDate
                     )
                     obj.save()
-
+        print('Save Stock Value Start ')
         for stock_obj in Stock.objects.all():
             #stock_obj = Stock.objects.get(stock_name='CJ')
-            df_stock = getStockValueFromNaver(stock_obj.stock_code, 0, count= 10)
+            print('Save stock value :', stock_obj.stock_name)
+            df_stock = getStockValueFromNaver(stock_obj.stock_code, 0)
+            sv_obj = []
+            print('DB Insert Start')
             for idx, stock_dat in df_stock.iterrows():
-
                 obj = StockValue.objects.filter(f_stock=stock_obj)
                 if obj:
                     try:
-                        sv_obj = StockValue.objects.get(f_stock=stock_obj, date=stock_dat['Date'])
+                        tmp_obj = StockValue.objects.get(f_stock=stock_obj, date=stock_dat['Date'])
                     except StockValue.DoesNotExist:
-                        sv_obj = StockValue(
+                        tmp_obj = StockValue(
                             f_stock=stock_obj,
                             date=stock_dat['Date'],
                             high=stock_dat['High'],
@@ -99,9 +102,9 @@ def updateStockCode(request):
                             adj_close=stock_dat['AdjClose'],
                             volume=stock_dat['Volume']
                         )
-                        sv_obj.save()
+                        sv_obj.append(tmp_obj)
                 else:
-                    sv_obj = StockValue(
+                    tmp_obj = StockValue(
                         f_stock=stock_obj,
                         date=stock_dat['Date'],
                         high=stock_dat['High'],
@@ -111,7 +114,9 @@ def updateStockCode(request):
                         adj_close=stock_dat['AdjClose'],
                         volume=stock_dat['Volume']
                     )
-                    sv_obj.save()
+                    sv_obj.append(tmp_obj)
+            print('DB Insert End')
+            StockValue.objects.bulk_create(sv_obj)
 
 
         return redirect('/stocks/if-i-bought')
