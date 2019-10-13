@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from .forms import StockInfoSelectForm
-from .models import Stock, Market
+from .models import Stock, Market, StockValue
 from django.contrib.auth.decorators import login_required
 #from dal import autocomplete
 from django.views.decorators.csrf import csrf_exempt
 import json
 import pandas as pd
+from .stockData import *
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -23,11 +24,11 @@ def if_i_bought_main(request):
         return render(request, 'stocks/if_i_bought_main.html', {'form' : form})
 
 @login_required
-def getStockCode(request):
+def updateStockCode(request):
     if request.method == "POST":
-        markets = [{'kospi':'stockMkt'}, {'kosdaq':'kosdaqMkt'}]
+        # 시장 데이터 저장
+        markets = getStockMarket()
         for market in markets:
-
             market_name = [*market][0]
             try:
                 m_obj = Market.objects.get(market_name = market_name)
@@ -35,26 +36,88 @@ def getStockCode(request):
                 m_obj = Market(market_name = market_name)
                 m_obj.save()
 
-            url_market = market[market_name]
-            url = 'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13&marketType=%s' % url_market
-            df = pd.read_html(url, header=0)[0]
+        # 시장별 주식 종목 정보 데이터 저장
+        for market in markets:
+            market_name = [*market][0]
+            q_mkt_name = market[market_name]
+            df_stockData = getStockDataFromKrxMktData(q_mkt_name)
+            try:
+                m_obj = Market.objects.get(market_name=market_name)
+            except Market.DoesNotExist:
+                return HttpResponse("ERROR")
 
-            df_nameAndCode = df[['회사명', '종목코드']]
-            df_nameAndCode['종목코드'] = df_nameAndCode['종목코드'].astype(str)
-            df_nameAndCode['종목코드'] = df_nameAndCode['종목코드'].str.zfill(6)
-
-            for idx, namecode in df_nameAndCode.iterrows():
-                stockName = namecode['회사명']
+            for idx, namecode in df_stockData.iterrows():
+                stockName = namecode['기업명']
                 stockCode = namecode['종목코드']
+                stockBussinesCode = namecode['업종코드']
+                stockListedShares = namecode['상장주식수(주)']
+                stockCapital = namecode['자본금(원)']
+                stockVFDate = namecode['최초상장일']
 
                 try:
-                    obj = Stock.objects.get(stock_name=stockName)
-                    Stock.objects.filter(stock_name=stockName).update(stock_code=stockCode, f_market=m_obj)
+                    obj = Stock.objects.get(stock_code=stockCode)
+                    if stockVFDate == None:
+                        continue
+
+                    Stock.objects.filter(stock_code=stockCode).update(
+                        stock_name=stockName,
+                        f_market=m_obj,
+                        business_type_code=stockBussinesCode,
+                        capital=stockCapital,
+                        listed_shares=stockListedShares,
+                        vf_listed_date=stockVFDate
+                    )
                 except Stock.DoesNotExist:
-                    obj = Stock(stock_name=stockName, stock_code=stockCode, f_market=m_obj)
+                    obj = Stock(
+                        stock_name=stockName,
+                        stock_code=stockCode,
+                        f_market=m_obj,
+                        business_type_code=stockBussinesCode,
+                        capital=stockCapital,
+                        listed_shares=stockListedShares,
+                        vf_listed_date=stockVFDate
+                    )
                     obj.save()
 
-        return redirect('/stocks/if_i_bought')
+        for stock_obj in Stock.objects.all():
+            #stock_obj = Stock.objects.get(stock_name='CJ')
+            df_stock = getStockValueFromNaver(stock_obj.stock_code, 0, count= 10)
+            for idx, stock_dat in df_stock.iterrows():
+
+                obj = StockValue.objects.filter(f_stock=stock_obj)
+                if obj:
+                    try:
+                        sv_obj = StockValue.objects.get(f_stock=stock_obj, date=stock_dat['Date'])
+                    except StockValue.DoesNotExist:
+                        sv_obj = StockValue(
+                            f_stock=stock_obj,
+                            date=stock_dat['Date'],
+                            high=stock_dat['High'],
+                            low=stock_dat['Low'],
+                            close=stock_dat['Close'],
+                            open=stock_dat['Open'],
+                            adj_close=stock_dat['AdjClose'],
+                            volume=stock_dat['Volume']
+                        )
+                        sv_obj.save()
+                else:
+                    sv_obj = StockValue(
+                        f_stock=stock_obj,
+                        date=stock_dat['Date'],
+                        high=stock_dat['High'],
+                        low=stock_dat['Low'],
+                        close=stock_dat['Close'],
+                        open=stock_dat['Open'],
+                        adj_close=stock_dat['AdjClose'],
+                        volume=stock_dat['Volume']
+                    )
+                    sv_obj.save()
+
+
+        return redirect('/stocks/if-i-bought')
+
+    elif request.method == "PUT":
+        return redirect('/stocks/index')
 
     return redirect('/stocks/index')
 

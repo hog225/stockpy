@@ -73,17 +73,32 @@
 
 </form>
 <hr class="mt-0 mb-4">
-<form method="post" action="admin">
-    {% csrf_token %}
-    <div class="row">
 
-    </div>
-    {% if user.is_authenticated and user.is_superuser %}
-        <button type="submit" class="btn btn-success">GetStockCode</button>
-    {% else %}
-        <button type="submit" class="btn btn-success" style="display: none;">GetStockCode</button>
-    {% endif %}
-</form>
+<div class="row">
+    <form method="post" action="init-stocks">
+        {% csrf_token %}
+        <div class="row">
+
+        </div>
+        {% if user.is_authenticated and user.is_superuser %}
+            <button type="submit" class="btn btn-success">CreateStockData</button>
+        {% else %}
+            <button type="submit" class="btn btn-success" style="display: none;">CreateStockData</button>
+        {% endif %}
+    </form>
+    &nbsp;
+    <form method="put" action="init-stocks">
+        {% csrf_token %}
+        <div class="row">
+
+        </div>
+        {% if user.is_authenticated and user.is_superuser %}
+            <button type="submit" class="btn btn-success">UpdateStockData</button>
+        {% else %}
+            <button type="submit" class="btn btn-success" style="display: none;">UpdateStockData</button>
+        {% endif %}
+    </form>
+</div>
 {% endblock %}
 
 
