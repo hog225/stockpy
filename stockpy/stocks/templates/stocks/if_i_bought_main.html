@@ -87,15 +87,27 @@
         {% endif %}
     </form>
     &nbsp;
-    <form method="put" action="init-stocks">
+    <form method="post" action="update-market">
         {% csrf_token %}
         <div class="row">
 
         </div>
         {% if user.is_authenticated and user.is_superuser %}
-            <button type="submit" class="btn btn-success">UpdateStockData</button>
+            <button type="submit" class="btn btn-success">UpdateMarket</button>
         {% else %}
-            <button type="submit" class="btn btn-success" style="display: none;">UpdateStockData</button>
+            <button type="submit" class="btn btn-success" style="display: none;">UpdateMarket</button>
+        {% endif %}
+    </form>
+    &nbsp;
+    <form method="post" action="update-stock-value">
+        {% csrf_token %}
+        <div class="row">
+
+        </div>
+        {% if user.is_authenticated and user.is_superuser %}
+            <button type="submit" class="btn btn-success">UpdateStockValue</button>
+        {% else %}
+            <button type="submit" class="btn btn-success" style="display: none;">UpdateStockValue</button>
         {% endif %}
     </form>
 </div>

@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import pandas as pd
 from .stockData import *
+import datetime
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -64,7 +65,7 @@ def saveStockValue(stock_obj):
     StockValue.objects.bulk_create(sv_obj)
 
 @login_required
-def updateStockCode(request):
+def initStockData(request):
     if request.method == "POST":
         # 시장 데이터 저장
         markets = getStockMarket()
@@ -119,6 +120,7 @@ def updateStockCode(request):
                         vf_listed_date=stockVFDate
                     )
                     obj.save()
+
         print('Save Stock Value Start ')
         for stock_obj in Stock.objects.all():
             saveStockValue(stock_obj)
@@ -126,12 +128,35 @@ def updateStockCode(request):
 
         return redirect('/stocks/if-i-bought')
 
-    elif request.method == "PUT":
-        return redirect('/stocks/index')
+
+
+    return redirect('/stocks/index')
+
+@login_required
+def updateMarket(request):
+    # 마켓데이터 그리고 마켓에 속한 종목을 업데이트 한다.
+    # 새로 추가된 마켓이 있으면 종목을 업데이트 하고 종목의 자산 가격을 업데이트 한다.
+    # 상패가 되었으면 DB 추가 해서 상패라고 써논다.
+    # 액면 분할이 나 어떤 ADJClose의 영향을 줄 경우 StockValue를 업데이트 한다.
+    # 기존 리스트 대비 새로 상장 되었으면 주가 데이터를 추가 한다.
+    #
+
 
     return redirect('/stocks/index')
 
 
+@login_required
+def updateStockValue(request):
+    # 주가, 자산가격을 업데이트 한다.
+    # 현제 DB의 가장 마지막 Date를 알아낸뒤
+    for stock_obj in Stock.objects.all():
+        recentDate = StockValue.objects.filter(f_stock_id=stock_obj).order_by('-date')[0].date
+        if datetime.date.today() - recentDate >= datetime.timedelta(days=1) and datetime.datetime.today().hour > 21:
+            pass
+
+        saveStockValue(stock_obj)
+
+    return redirect('/stocks/index')
 
 # django-autocomplete-light 사용 하려다가 포기함
 def StocksAutocomplete(request):

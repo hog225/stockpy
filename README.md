@@ -32,6 +32,8 @@
         mysql -u user1 -ppassword
       
     create database stock_py  #create database
+    DB BackUp : mysql [dbname] -u [username] -p[password] -N -e 'show tables like "bak\_%"' | xargs mysqldump [dbname] -u [username] -p[password] > [dump_file] 
+    DB Restore : mysql -u [사용자 계정] -p [패스워드] [복원할 DB] < [백업된 DB].sql
     
 # Integration MariaDB
     - pip install mysqlclient, configparser
