@@ -23,6 +23,46 @@ def if_i_bought_main(request):
         form = StockInfoSelectForm()
         return render(request, 'stocks/if_i_bought_main.html', {'form' : form})
 
+@checkTime
+def saveStockValue(stock_obj):
+    # stock_obj = Stock.objects.get(stock_name='CJ')
+    print('Save stock value :', stock_obj.stock_name)
+    df_stock = getStockValueFromNaver(stock_obj.stock_code, 0)
+    sv_obj = []
+
+    start = time.time()
+    obj = StockValue.objects.filter(f_stock=stock_obj)
+    for idx, stock_dat in df_stock.iterrows():
+        if obj:
+            try:
+                tmp_obj = obj.get(date=stock_dat['Date'])
+            except StockValue.DoesNotExist:
+                tmp_obj = StockValue(
+                    f_stock=stock_obj,
+                    date=stock_dat['Date'],
+                    high=stock_dat['High'],
+                    low=stock_dat['Low'],
+                    close=stock_dat['Close'],
+                    open=stock_dat['Open'],
+                    adj_close=stock_dat['AdjClose'],
+                    volume=stock_dat['Volume']
+                )
+                sv_obj.append(tmp_obj)
+        else:
+            tmp_obj = StockValue(
+                f_stock=stock_obj,
+                date=stock_dat['Date'],
+                high=stock_dat['High'],
+                low=stock_dat['Low'],
+                close=stock_dat['Close'],
+                open=stock_dat['Open'],
+                adj_close=stock_dat['AdjClose'],
+                volume=stock_dat['Volume']
+            )
+            sv_obj.append(tmp_obj)
+
+    StockValue.objects.bulk_create(sv_obj)
+
 @login_required
 def updateStockCode(request):
     if request.method == "POST":
@@ -81,42 +121,7 @@ def updateStockCode(request):
                     obj.save()
         print('Save Stock Value Start ')
         for stock_obj in Stock.objects.all():
-            #stock_obj = Stock.objects.get(stock_name='CJ')
-            print('Save stock value :', stock_obj.stock_name)
-            df_stock = getStockValueFromNaver(stock_obj.stock_code, 0)
-            sv_obj = []
-            print('DB Insert Start')
-            for idx, stock_dat in df_stock.iterrows():
-                obj = StockValue.objects.filter(f_stock=stock_obj)
-                if obj:
-                    try:
-                        tmp_obj = StockValue.objects.get(f_stock=stock_obj, date=stock_dat['Date'])
-                    except StockValue.DoesNotExist:
-                        tmp_obj = StockValue(
-                            f_stock=stock_obj,
-                            date=stock_dat['Date'],
-                            high=stock_dat['High'],
-                            low=stock_dat['Low'],
-                            close=stock_dat['Close'],
-                            open=stock_dat['Open'],
-                            adj_close=stock_dat['AdjClose'],
-                            volume=stock_dat['Volume']
-                        )
-                        sv_obj.append(tmp_obj)
-                else:
-                    tmp_obj = StockValue(
-                        f_stock=stock_obj,
-                        date=stock_dat['Date'],
-                        high=stock_dat['High'],
-                        low=stock_dat['Low'],
-                        close=stock_dat['Close'],
-                        open=stock_dat['Open'],
-                        adj_close=stock_dat['AdjClose'],
-                        volume=stock_dat['Volume']
-                    )
-                    sv_obj.append(tmp_obj)
-            print('DB Insert End')
-            StockValue.objects.bulk_create(sv_obj)
+            saveStockValue(stock_obj)
 
 
         return redirect('/stocks/if-i-bought')

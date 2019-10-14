@@ -4,7 +4,15 @@ from io import BytesIO
 import urllib.parse
 import xml.etree.ElementTree as ET
 import datetime
+import time
 
+def checkTime(func):
+    def decorator(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        print('FUNC : ', func.__name__, ' Precess Time : ', time.time()-start)
+        return result
+    return decorator
 
 def getStockDataBasic():
     markets = [{'kospi': 'stockMkt'}, {'kosdaq': 'kosdaqMkt'}]
@@ -42,6 +50,7 @@ def getStockMarket():
     return markets
 
 # https://blog.naver.com/flow2kudo/221319347186 인용
+@checkTime
 def getStockDataFromKrxMktData(q_mkt_name):
     gen_req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
     query_str_parms = {
@@ -75,9 +84,9 @@ def getStockDataFromKrxMktData(q_mkt_name):
     df_stockData['업종코드'] = df_stockData['업종코드'].str.zfill(6)
 
     df_stockData['최초상장일'] = None
-    # for idx, data in df_stockData.iterrows():
-    #     vf_listed_date = getVeryFirstListDateFromNaver(data['종목코드'])
-    #     data['최초상장일'] = vf_listed_date
+    for idx, data in df_stockData.iterrows():
+        vf_listed_date = getVeryFirstListDateFromNaver(data['종목코드'])
+        data['최초상장일'] = vf_listed_date
 
 
     return df_stockData
@@ -93,7 +102,6 @@ def getVeryFirstListDateFromNaver(stock_code):
     return vf_listed_date
 
 def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
-    print('getStockValueFromNaver start')
     url = 'https://fchart.stock.naver.com/sise.nhn?symbol=%s&timeframe=day&startTime=20021101&count=%d&requestType=%d' % (stock_code, count, reqtype)
     r = requests.get(url)
     root = ET.fromstring(r.text)
@@ -106,7 +114,7 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 
         df_new = pd.DataFrame([stockVal], columns=['Date', 'Open', 'High', 'Low','AdjClose', 'Volume', 'Close'])
         df_org = df_org.append(df_new, ignore_index=True, sort= False)
-    print('getStockValueFromNaver end')
+
     return df_org
 
 
