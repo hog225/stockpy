@@ -44,4 +44,12 @@
     - crispy forms install requirments.txt에 포함 -> setting.py 변경
     - Jquery WEB site에서 Jquery 다운 
     - https://getbootstrap.com 에서 Compiled CSS and JS 다운 
-    - stocks/static 에다 css, js 파일 이동
+    - stocks/static/ccs: ccs 파일 이동 
+    - stocks/static/js: js 파일 이동
+## Bootstrap theme 적용
+    - 사용한 theme : startbootstrap-bare-gh-pages  
+    - stocks/static/stocks: 원하는 theme 다운로드 후 index 만 빼고 모든 파일 이동
+    - index.html 을 base.html로 사용  
+    - 
+    
+    

@@ -9,9 +9,11 @@ import json
 import pandas as pd
 from .stockData import *
 import datetime
+from django.template import loader
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    template = loader.get_template('stocks/index.html')
+    return HttpResponse(template.render({}, request))
 
 def if_i_bought_main(request):
     if request.method == "POST":
@@ -158,9 +160,7 @@ def updateStockValue(request):
         recentDate = StockValue.objects.filter(f_stock_id=stock_obj).order_by('-date')[0].date
         if datetime.date.today() - recentDate >= datetime.timedelta(days=1) and datetime.datetime.today().hour > 20:
             saveStockValue(stock_obj, recentDate)
-            # df_sv = getStockValueFromNaver(stock_obj.stock_code, 0, count=td.days + 1)
-            # df_filt = df_sv[df_sv.Date > recentDate]
-            return redirect('/stocks/if-i-bought')
+
     return redirect('/stocks/index')
 
 # django-autocomplete-light 사용 하려다가 포기함
