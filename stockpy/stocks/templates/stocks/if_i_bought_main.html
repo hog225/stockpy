@@ -47,7 +47,6 @@
 
             });
             $("#datetimepicker1").datetimepicker({
-
                 format: 'DD/MM/YYYY',
             });
         });
@@ -72,9 +71,9 @@
       <div class="col-12">
         {{ form.stock_name|as_crispy_field }}
       </div>
-      <div class="col-12">
+      <div class="col-5">
         <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-          {{ form.start_date | as_crispy_field}}
+          {{ form.start_date }}
           <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
           </div>
