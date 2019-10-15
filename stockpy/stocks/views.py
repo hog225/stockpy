@@ -25,10 +25,15 @@ def if_i_bought_main(request):
         return render(request, 'stocks/if_i_bought_main.html', {'form' : form})
 
 @checkTime
-def saveStockValue(stock_obj):
+def saveStockValue(stock_obj, last_date_on_db=None):
     # stock_obj = Stock.objects.get(stock_name='CJ')
     print('Save stock value :', stock_obj.stock_name)
-    df_stock = getStockValueFromNaver(stock_obj.stock_code, 0)
+    if last_date_on_db != None:
+        td = datetime.date.today() - last_date_on_db
+        df_tmp_stock = getStockValueFromNaver(stock_obj.stock_code, 0, count=td.days+1)
+        df_stock = df_tmp_stock[df_tmp_stock.Date > last_date_on_db]
+    else:
+        df_stock = getStockValueFromNaver(stock_obj.stock_code, 0)
     sv_obj = []
 
     start = time.time()
@@ -151,11 +156,11 @@ def updateStockValue(request):
     # 현제 DB의 가장 마지막 Date를 알아낸뒤
     for stock_obj in Stock.objects.all():
         recentDate = StockValue.objects.filter(f_stock_id=stock_obj).order_by('-date')[0].date
-        if datetime.date.today() - recentDate >= datetime.timedelta(days=1) and datetime.datetime.today().hour > 21:
-            pass
-
-        saveStockValue(stock_obj)
-
+        if datetime.date.today() - recentDate >= datetime.timedelta(days=1) and datetime.datetime.today().hour > 20:
+            saveStockValue(stock_obj, recentDate)
+            # df_sv = getStockValueFromNaver(stock_obj.stock_code, 0, count=td.days + 1)
+            # df_filt = df_sv[df_sv.Date > recentDate]
+            return redirect('/stocks/if-i-bought')
     return redirect('/stocks/index')
 
 # django-autocomplete-light 사용 하려다가 포기함
