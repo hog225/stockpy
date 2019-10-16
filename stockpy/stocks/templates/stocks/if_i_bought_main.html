@@ -10,6 +10,25 @@
 
 
     <script type="text/javascript">
+        Number.prototype.format = function(){
+            if(this==0) return 0;
+
+            var reg = /(^[+-]?\d+)(\d{3})/;
+            var n = (this + '');
+
+            while (reg.test(n)) n = n.replace(reg, '$1' + ',' + '$2');
+
+            return n;
+        };
+
+        // 문자열 타입에서 쓸 수 있도록 format() 함수 추가
+        String.prototype.format = function(){
+            var num = parseFloat(this);
+            if( isNaN(num) ) return "0";
+
+            return num.format();
+        };
+
         $(function() {
 
             $(".stockNameAutoComplete").autocomplete({
@@ -47,7 +66,24 @@
 
             });
             $("#datetimepicker1").datetimepicker({
+
                 format: 'DD/MM/YYYY',
+            });
+            $("#datetimepicker2").datetimepicker({
+
+                format: 'DD/MM/YYYY',
+            });
+            $('input[type="money"]').keyup(function(event) {
+
+                // skip for arrow keys
+                if(event.which >= 37 && event.which <= 40) return;
+
+                // format number
+                $(this).val(function(index, value) {
+                    return value
+                    .replace(/\D/g, "")
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                });
             });
         });
     </script>
@@ -62,26 +98,48 @@
 <form method="post" action=".">
     {% csrf_token %}
     <div class="row">
-      <div class="col-6">
-        {{ form.market_name|as_crispy_field }}
-      </div>
-      <div class="col-6">
-        {{ form.tech_anal_name|as_crispy_field }}
-      </div>
-      <div class="col-12">
-        {{ form.stock_name|as_crispy_field }}
-      </div>
-      <div class="col-5">
-        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-          {{ form.start_date }}
-          <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
-            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-          </div>
+        <div class="col-6">
+            {{ form.market_name|as_crispy_field }}
         </div>
-      </div>
+        <div class="col-6">
+            {{ form.tech_anal_name|as_crispy_field }}
+        </div>
+        <div class="col-12">
+            {{ form.stock_name|as_crispy_field }}
+        </div>
+        <div class="col-6">
+            <div id="div_id_start_date" class="form-group">
+                <label for="id_start_date" class="col-form-label  requiredField">
+                    StartDate<span class="asteriskField">*</span>
+                </label>
+                <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                    {{ form.start_date }}
+                    <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div id="div_id_end_date" class="form-group">
+                <label for="id_end_date" class="col-form-label  requiredField">
+                    EndDate<span class="asteriskField">*</span>
+                </label>
+                <div class="input-group date" id="datetimepicker2" data-target-input="nearest">
+                    {{ form.end_date }}
+                    <div class="input-group-append" data-target="#datetimepicker2" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            {{ form.investment_amount|as_crispy_field }}
+        </div>
         <div class="col-12">
             <p id="selectResult"></p>
-      </div>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-success">측정고고</button>

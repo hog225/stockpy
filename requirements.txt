@@ -6,6 +6,7 @@ configparser==4.0.2
 Django==2.2.5
 django-autocomplete-light==3.4.1
 django-crispy-forms==1.7.2
+django-money==0.15.1
 django-widget-tweaks==1.4.5
 html5lib==1.0.1
 idna==2.8
@@ -13,6 +14,7 @@ lxml==4.4.1
 mysqlclient==1.4.4
 numpy==1.17.2
 pandas==0.25.1
+py-moneyed==0.8.0
 python-dateutil==2.8.0
 pytz==2019.2
 requests==2.22.0

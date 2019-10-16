@@ -20,7 +20,9 @@ def if_i_bought_main(request):
         form = StockInfoSelectForm(request.POST)
 
         if form.is_valid():
-            print(form.cleaned_data['market_name'])
+
+            print(form.cleaned_data)
+
         return redirect('/stocks/index')
     else:
         form = StockInfoSelectForm()

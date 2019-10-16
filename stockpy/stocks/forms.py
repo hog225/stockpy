@@ -17,12 +17,26 @@ class StockInfoSelectForm(forms.Form):
         })
     )
 
+    end_date = forms.DateTimeField(
+        input_formats=['%d/%m/%Y'],
+        widget=forms.DateTimeInput(attrs={
+            'class': 'form-control datetimepicker-input',
+            'data-target': '#datetimepicker2'
+        })
+    )
+
     stock_name = forms.CharField(max_length=50, label='Stocks', widget=forms.TextInput(
         attrs={
             #'style': 'width: 400px',
             'class': 'stockNameAutoComplete',
             'disabled': 'disabled',
             #'data-url': "/domain/stock_name_autocomplete/"
+        }
+    ))
+
+    investment_amount = forms.CharField(label='투자금액(원)', widget=forms.TextInput(
+        attrs={
+            'type': 'money',
         }
     ))
 
