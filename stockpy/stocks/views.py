@@ -22,8 +22,9 @@ def if_i_bought_main(request):
         if form.is_valid():
 
             print(form.cleaned_data)
-
-        return redirect('/stocks/index')
+        data = json.dumps({'result':'Success'})
+        mimetype = 'application/json'
+        return HttpResponse(data, mimetype)
     else:
         form = StockInfoSelectForm()
         return render(request, 'stocks/if_i_bought_main.html', {'form' : form})

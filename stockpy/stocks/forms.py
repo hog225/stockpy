@@ -1,4 +1,5 @@
 from .models import *
+import datetime
 
 
 class StockInfoSelectForm(forms.Form):
@@ -10,7 +11,7 @@ class StockInfoSelectForm(forms.Form):
         tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label='Technical analysis', required=False)
 
     start_date = forms.DateTimeField(
-        input_formats=['%d/%m/%Y'],
+        input_formats=['%Y/%m/%d'],
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control datetimepicker-input',
             'data-target': '#datetimepicker1'
@@ -18,7 +19,8 @@ class StockInfoSelectForm(forms.Form):
     )
 
     end_date = forms.DateTimeField(
-        input_formats=['%d/%m/%Y'],
+        input_formats=['%Y/%m/%d'],
+        initial= datetime.datetime.now().strftime("%Y/%m/%d"),
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control datetimepicker-input',
             'data-target': '#datetimepicker2'
@@ -38,6 +40,7 @@ class StockInfoSelectForm(forms.Form):
         attrs={
             'type': 'money',
         }
+
     ))
 
 
