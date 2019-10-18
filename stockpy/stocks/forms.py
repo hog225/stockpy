@@ -1,6 +1,6 @@
 from .models import *
 import datetime
-
+import re
 
 class StockInfoSelectForm(forms.Form):
     market_name = forms.ModelChoiceField(queryset=Market.objects.all(), label='Market')
@@ -42,6 +42,55 @@ class StockInfoSelectForm(forms.Form):
         }
 
     ))
+
+    def is_valid(self):
+        valid = super(StockInfoSelectForm, self).is_valid()
+
+        if not valid:
+            return valid, 'form error'
+
+        try:
+            obj_market = Market.objects.get(market_name = self.cleaned_data['market_name'])
+        except Market.DoesNotExist:
+            return False, 'Not Exist Market Name'
+
+        try:
+            TechAnal.objects.get(tech_anal_name = self.cleaned_data['tech_anal_name'])
+        except Market.DoesNotExist:
+            return True, 'Not Exist Tech Anal'
+
+        try:
+            if self.cleaned_data['start_date'].date() - datetime.datetime.now().date() > datetime.timedelta(0):
+                return False, 'Invalid Start Date'
+        except Exception as e:
+            print(e)
+            return False, 'Invalid Date Format'
+
+        try:
+            if self.cleaned_data['end_date'].date() - datetime.datetime.now().date() > datetime.timedelta(0):
+                return False, 'Invalid End Date'
+        except Exception as e:
+            print(e)
+            return False, 'Invalid Date Format'
+
+        try:
+            money = re.sub("[^\d\.]", "", self.cleaned_data['investment_amount'])
+            print(money)
+            if len(money) > 13: # 조단위
+                return False, 'Too Much Money'
+        except:
+            return False, 'Invalid Money'
+
+        try:
+            Stock.objects.get(stock_name = self.cleaned_data['stock_name'], f_market = obj_market)
+        except Stock.DoesNotExist:
+            return False, 'Not Exist Stock'
+
+
+
+
+        return True, 'Success'
+
 
 
 

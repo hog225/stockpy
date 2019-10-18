@@ -69,7 +69,7 @@
 
             $(".stockNameAutoComplete").autocomplete({
                 source: function(request, response) {
-                    $.getJSON("/stocks/stock-name-autocomplete", { q: request.term }, response);
+                    $.getJSON("/stocks/stock-name-autocomplete", { q: request.term , s: $("#id_market_name").val()}, response);
                 },
                 select: function(event, ui) {
                     console.log(ui.item);
@@ -108,7 +108,8 @@
                     type: $(this).attr('method'), // GET or POST
                     url: $(this).attr('action'), // the file to call
                     success: function(response) { // on success..
-                        console.log(response)
+
+                        console.log(response.result)
                         $("#{{ form.market_name.auto_id }}").val('')
                         $("#{{ form.stock_name.auto_id }}").val('')
                         $(".stockNameAutoComplete").attr({
@@ -117,13 +118,14 @@
                         $("#{{ form.start_date.auto_id }}").val('')
                         $("#{{ form.end_date.auto_id }}").val($.datepicker.formatDate('yy/mm/dd', new Date()))
                         $("#{{ form.investment_amount.auto_id }}").val('')
-                        $('#moneyPrint').val('')
+                        $("#moneyPrint").text('')
+                        $('#finalResults').html('')
 
-                    }
+                    },
                     error : function(xhr, errmsg, err) {
-                        $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-                            " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-                        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                        $('#finalResults').html("<div class='alert-box alert radius' data-alert>에러 발생 !! : "
+                            +xhr.responseJSON["result"]+ " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                        console.log(xhr.status + ": " + xhr.responseJSON["result"]); // provide a bit more info about the error to the console
                     }
                 });
 
@@ -223,6 +225,9 @@
     </div>
 
     <input type="submit" class="btn btn-success"></input>
+    <div id="finalResults" class="co1-12">
+
+    </div>
 
     <hr class="mt-4 mb-4">
     <div class="col-12">

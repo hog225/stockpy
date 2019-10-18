@@ -17,14 +17,38 @@ def index(request):
 
 def if_i_bought_main(request):
     if request.method == "POST":
+        code = 200
         form = StockInfoSelectForm(request.POST)
+        result, cause = form.is_valid()
 
-        if form.is_valid():
+        if result:
+            stock_obj = Stock.objects.get(stock_name = form.cleaned_data['stock_name'])
+            # 아래 from, to 지정 필요 !!!!!!!!!!
+            sv_objs = StockValue.objects.filter(f_stock_id=stock_obj).order_by('date')
 
-            print(form.cleaned_data)
-        data = json.dumps({'result':'Success'})
+            valueList = []
+            for obj in sv_objs:
+                valueList.append({
+                    'x': obj.date,
+                    'y': [obj.open, obj,high, obj.low, obj.adj_close]
+                })
+
+
+            jsonData = json.dumps({
+                'result': 'Success',
+                'data': valueList
+            })
+
+
+        else:
+            jsonData = json.dumps({'result': cause})
+            code = 400
+
+
         mimetype = 'application/json'
-        return HttpResponse(data, mimetype)
+        return HttpResponse(jsonData, mimetype, status=code)
+
+
     else:
         form = StockInfoSelectForm()
         return render(request, 'stocks/if_i_bought_main.html', {'form' : form})
@@ -169,7 +193,15 @@ def updateStockValue(request):
 # django-autocomplete-light 사용 하려다가 포기함
 def StocksAutocomplete(request):
     if request.GET.__contains__('q'):
-        qs = Stock.objects.filter(stock_name__startswith=request.GET['q'])
+
+        try:
+            market_key = request.GET['s']
+            obj_market = Market.objects.get(id=market_key)
+            qs = Stock.objects.filter(stock_name__startswith=request.GET['q'], f_market=obj_market)
+        except Exception as e:
+            qs = Stock.objects.filter(stock_name__startswith=request.GET['q'])
+
+
         results = []
         for q in qs:
             tag_json = {}
