@@ -51,5 +51,12 @@
     - stocks/static/stocks: 원하는 theme 다운로드 후 index 만 빼고 모든 파일 이동
     - index.html 을 base.html로 사용  
     - 
+ # ta-lib 
+    1. wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz / 참고로 git 에서 가져온건 안됨 ..
+    2. cd ta-lib/
+       ./configure --prefix=/usr
+       make
+    3. sudo make install
+    4. pip install TA-Lib     
     
     

@@ -5,6 +5,33 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 import datetime
 import time
+import talib as TA
+
+
+# 하강 패턴
+BEARISH_ENGULFING = 'BE_CDLENGULFING'
+DARK_CLOUD_COVER = 'CDLDARKCLOUDCOVER'
+EVENING_STAR = 'CDLEVENINGSTAR' # 주가 상방에서 하락 반전 신호로 인식됨
+GRAVESTONE_DOJI = 'CDLGRAVESTONEDOJI' ## 주가 상방에서 하락 반전 신호로 인식됨
+HANGING_MAN = 'CDLHANGINGMAN' # 주가 상승추세 꼭대기에서 하락 반전 신호로 인식
+SHOOTING_STAR = 'CDLSHOOTINGSTAR' # 주가 상방에서 하락 반전 신호로 인식됨
+TWEEZERTOP = 'NotExist'
+# --------------------------------------------------
+
+# 상승 패턴
+BULLISH_ENGULFING = 'BU_CDLENGULFING'
+DRAGONFLY_DOJI = 'CDLDRAGONFLYDOJI' # 주가 하방에서 상승 반전 신호로 인식됨
+HAMMER = 'CDLHAMMER' # 하양추세 바닥에서 상승신호
+INVERTED_HAMMER = 'CDLINVERTEDHAMMER' # 하양추세 바닥에서 상승으로 갈 수 있다는 경고 다른 패턴 보다 신뢰성 떨어짐
+MORNING_STAR = 'CDLMORNINGSTAR' # 하양추세 바닥에서 상승신호
+PIERCING_PATTERN = 'CDLPIERCING'  # 상승신호 BULLISH_ENGULFING 이랑 비슷
+TWEEZERBOTTOM = 'NotExist'
+# --------------------------------------------------
+
+# 추세 변경 신호
+DOJI = 'CDLDOJI'
+HARAMI = 'CDLHARAMI'
+# --------------------------------------------------
 
 def checkTime(func):
     def decorator(*args, **kwargs):
@@ -117,7 +144,9 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 
     return df_org
 
-
+# 다음 에 해야함 패턴 인식을 통한 매매
+def getTradePointFromPatternRecorg(thech_anal_name, df):
+    pass
 
 if __name__ == "__main__":
 

@@ -6,3 +6,12 @@ from django.test import TestCase
 # from stocks.models import Stock, Market, StockValue
 # from stocks.stockData import *
 # s_obj = Stock.objects.get(stock_code='005930')
+
+a = StockInfoSelectForm({
+    "market_name":1,
+    "tech_anal_name":1,
+    "stock_name": "CJ CGV",
+    "start_date": "2019/09/30",
+    "end_date": "2019/10/19",
+    "investment_amount":"234"
+})

@@ -75,7 +75,7 @@ class StockInfoSelectForm(forms.Form):
 
         try:
             money = re.sub("[^\d\.]", "", self.cleaned_data['investment_amount'])
-            print(money)
+
             if len(money) > 13: # 조단위
                 return False, 'Too Much Money'
         except:

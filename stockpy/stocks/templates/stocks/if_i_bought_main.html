@@ -14,56 +14,49 @@
         var options = {
             chart: {
                 type: 'area',
-                    stacked: false,
-                    height: 350,
-                zoom: {
-                    type: 'x',
-                    enabled: true,
-                    autoScaleYaxis: true
-                },
-                toolbar: {
-                    autoSelected: 'zoom'
-                }
+//                stacked: false,
+                height: 350,
+//                zoom: {
+//                    type: 'x',
+//                    enabled: true,
+//                    autoScaleYaxis: true
+//                },
+//                toolbar: {
+//                    autoSelected: 'zoom'
+//                }
 
             },
-            annotations: {
-                xaxis: []
-            },
-            series: [{
-                name: '',
-                data: []
-                
-            }],
-
-            title: {
-                text: 'Stock Price Chart',
-                align: 'left'
+            dataLabels: {
+                enabled: false
             },
             yaxis: {
-                labels: {
-                    formatter: function (val) {
-                        return (val).toFixed(0);
-                    },
-                },
+
                 title: {
                     text: 'Price'
-                },
+                }
+            },
+            annotations:{
+                points: []
             },
             markers: {
                 size: 0,
                 style: 'hollow',
             },
+            series: [{
+                name: '',
+                data: []
+            }],
+            title: {
+                text: 'Stock Price Chart',
+                align: 'center'
+            },
+
+
             xaxis: {
                 type: 'datetime',
-                
+                tickAmount: 6,
             },
             tooltip: {
-                shared: false,
-                y: {
-                    formatter: function (val) {
-                        return (val).toFixed(0)
-                    }
-                },
                 x: {
                     format: 'dd MMM yyyy'
                 }
@@ -337,25 +330,66 @@
 
                         options.series[0].data = response.data
                         options.series[0].name = response.stockName
+                        options.title.text = response.stockName
+                        options.annotations.points = []
                         console.log(response.buyList.length)
-                        for (var i =0; i< response.buyList.length; i++)
+
+                        for (var idx =0; idx< response.buyList.length; idx++)
                         {
-                            options.annotations.xaxis.append({
-                                x: response.buyList[i],
-                                strokeDashArray: 0,
-                                borderColor: '#775DD0',
+                            console.log(response.buyList[idx][0], response.buyList[idx][1])
+                            options.annotations.points.push({
+                                // butList 의 내부 List: 0 은 date, 1은 Adj Close
+                                x: new Date(response.buyList[idx][0]).getTime(),
+                                y: response.buyList[idx][1],
+                                marker: {
+                                    size: 8,
+                                    fillColor: '#fff',
+                                    strokeColor: 'red',
+                                    radius: 2,
+                                    cssClass: 'apexcharts-custom-class'
+                                },
                                 label: {
-                                    borderColor: '#775DD0',
+                                    borderColor: '#FF4560',
+                                    offsetY: 0,
                                     style: {
                                         color: '#fff',
-                                        background: '#775DD0',
+                                        background: '#FF4560',
                                     },
-                                    text: 'buyList',
+
+                                    text: 'BUY',
                                 }
                             })
                         }
+                        for (var idx =0; idx< response.sellList.length; idx++)
+                        {
+                            console.log(response.sellList[idx][0], response.sellList[idx][1])
+                            options.annotations.points.push({
+                                // sellList 의 내부 List: 0 은 date, 1은 Adj Close
+                                x: new Date(response.sellList[idx][0]).getTime(),
+                                y: response.sellList[idx][1],
+                                marker: {
+                                    size: 8,
+                                    fillColor: '#fff',
+                                    strokeColor: 'blue',
+                                    shape: 'square',
+                                    radius: 2,
+                                    cssClass: 'apexcharts-custom-class'
+                                },
+                                label: {
+                                    borderColor: '#2b25ff',
+                                    offsetY: 0,
+                                    style: {
+                                        color: '#fff',
+                                        background: '#2b25ff',
+                                    },
 
+                                    text: 'SELL',
+                                }
+                            })
+                        }
                         //options.annotations.xaxis[0].x = response
+                        $("#chart").html('')
+
                         var chart = new ApexCharts(
                             document.querySelector("#chart"),
                             options
