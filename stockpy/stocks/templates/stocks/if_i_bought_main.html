@@ -26,7 +26,9 @@
                 }
 
             },
-
+            annotations: {
+                xaxis: []
+            },
             series: [{
                 name: '',
                 data: []
@@ -335,6 +337,25 @@
 
                         options.series[0].data = response.data
                         options.series[0].name = response.stockName
+                        console.log(response.buyList.length)
+                        for (var i =0; i< response.buyList.length; i++)
+                        {
+                            options.annotations.xaxis.append({
+                                x: response.buyList[i],
+                                strokeDashArray: 0,
+                                borderColor: '#775DD0',
+                                label: {
+                                    borderColor: '#775DD0',
+                                    style: {
+                                        color: '#fff',
+                                        background: '#775DD0',
+                                    },
+                                    text: 'buyList',
+                                }
+                            })
+                        }
+
+                        //options.annotations.xaxis[0].x = response
                         var chart = new ApexCharts(
                             document.querySelector("#chart"),
                             options

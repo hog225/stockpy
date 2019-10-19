@@ -37,11 +37,19 @@ def if_i_bought_main(request):
                     obj.adj_close
                 ])
 
-
+            b_list = []
+            s_list = []
+            if form.cleaned_data['tech_anal_name'] == '존버':
+                b_list.append(s_date)
+                s_list.append(e_date)
+            print(b_list, form.cleaned_data['tech_anal_name'])
             jsonData = json.dumps({
                 'result': 'Success',
                 'data': valueList,
                 'stockName': form.cleaned_data['stock_name'],
+                'buyList' : b_list,
+                'sellList' : s_list,
+
             })
 
 
