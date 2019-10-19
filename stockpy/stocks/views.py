@@ -25,18 +25,23 @@ def if_i_bought_main(request):
             stock_obj = Stock.objects.get(stock_name = form.cleaned_data['stock_name'])
             # 아래 from, to 지정 필요 !!!!!!!!!!
             sv_objs = StockValue.objects.filter(f_stock_id=stock_obj).order_by('date')
+            s_date = form.cleaned_data['start_date'].date()
+            e_date = form.cleaned_data['end_date'].date()
+            sv_objs = sv_objs.filter(date__range=(s_date, e_date))
 
             valueList = []
             for obj in sv_objs:
-                valueList.append({
-                    'x': obj.date,
-                    'y': [obj.open, obj,high, obj.low, obj.adj_close]
-                })
+
+                valueList.append([
+                    obj.date.strftime("%Y-%m-%d"),
+                    obj.adj_close
+                ])
 
 
             jsonData = json.dumps({
                 'result': 'Success',
-                'data': valueList
+                'data': valueList,
+                'stockName': form.cleaned_data['stock_name'],
             })
 
 
