@@ -39,9 +39,10 @@ ADX = 2 # Average Directional Movement Index 방향이동 지표를 보조하는
 APO = 3 # Absolute Price Oscillator 두 지수 이동 평균의 차를 표시함 0 위로 뚫고 올라가면 매수 신호 반대의 경우 매도 신호
 AROONOSC = 4 # Aroon Oscillator 오실레이터가 0을 뚫고 올라가면 상승 트렌드 시작 반대면 하강 트렌드
 CCI = 5 # Commodity channel index Donald Lambert 과매수 과매도를 판단하기 위해 사용됨 70 ~80 들갔다가 내려오면 매도 , 20 ~30 들갔다가 올라올때 매수
-MACD = 6
-RSI = 7
-STOCH = 8
+MA = 6
+MACD = 7
+RSI = 8
+STOCH = 9
 
 def checkTime(func):
     def decorator(*args, **kwargs):
@@ -154,12 +155,63 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 
     return df_org
 
-def getTradePointFromMomentum(thech_anal_name, df):
-    pass
+def getTradePointFromMomentum(tech_anal_code, stock_val_df):
+    buyList = []
+    sellList = []
+
+    # 매수든 매도는 매매시그널을 Stock_val_df에 저장 후 리턴
+
+    # 여기서 BuyList SellList 리턴하지 않고 makeResultData 에서 리턴해야 한다.
+    # 아이 함수에선 아직 정확한 매매시점을 찾지 않는다
+    if tech_anal_code == JONBER:
+        buyList.append([
+            stock_val_df.iloc[0].Date.strftime("%Y-%m-%d"),
+            stock_val_df.iloc[0].AdjClose
+        ])
+        sellList.append([
+            stock_val_df.iloc[-1].Date.strftime("%Y-%m-%d"),
+            stock_val_df.iloc[-1].AdjClose
+        ])
+    if tech_anal_code == MACD:
+
+        pass
+
+    return buyList, sellList
 
 # 다음 에 해야함 패턴 인식을 통한 매매
 def getTradePointFromPatternRecorg(pattern_name, df):
     pass
+
+def makeResultData(stock_val_df, blance):
+    pass
+    buyList = []
+    sellList = []
+    final_balance = pd.Series()
+    final_asset = pd.Series()
+    final_stock_count = pd.Series()
+    # 매매 시점에 따라서 Balance 데이터를 변경 시킴 필요 데이터 Balance(현금), Asset(현금 + 주식가치), Stock Count
+    # 0, 최초 Buy 시점 이후 Balance = Asset 과 같고 Stock COunt 는 0 으로 데이터 채움
+    # 1, BUY 시점을 찾아서 매수를 때리고 (이때 Buy 리스트 추가 )
+    # Stocks 에 산수량 Blance엔 산 수량만큼 차감 이 수치를 다음 Sell Point -1 까지 적용 그리고 Asset 에는 Stock count * 그시점 종가
+    # 2, 이 후 Sell Point 시 Stocks 를 0으로 만들고 Blace에 ADD Asset = Balance 다음 Buy point -1 까지 적용
+    # 3, 1 ~ 2 번 반복
+
+    # 아래 데이터 pd 시리즈 예상
+    return buyList, sellList, final_balance, final_asset, final_stock_count
+
+
+def makeResultText(org_asset, result_asset, ):
+
+    text = '원금 %s원은 투자기간 %s일 이후 %s원이 되었습니다. \n'
+    text += '원금 대비 번 돈은 %s원이며 수익률은 %f% 입니다. \n'
+    text += '초기 주식 보유량은 %d 이고 마지막 보유량은 %d 입니다. \n'
+    text += '투자 성과가 가장 좋았던 해는 %년 처음 자산 %s 에서 마지막 자산 %s 로 증가 했습니다. \n'
+    # http://www.index.go.kr/potal/stts/idxMain/selectPoSttsIdxSearch.do?idx_cd=1073 / 역대 금리 리스트
+    #text += '원금 %s를 같은 기간동안 은행에 맡겼으면 기준금리 기준 %s원이 되었을 겁니다.'
+    text += '종합적으로 당신의 투자는 %s 했습니다. \n'
+
+
+
 
 if __name__ == "__main__":
 

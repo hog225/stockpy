@@ -48,7 +48,11 @@
             }],
             title: {
                 text: 'Stock Price Chart',
-                align: 'center'
+                align: 'center',
+                style: {
+                    fontSize: '25px',
+                    color: '#263238',
+                }
             },
 
 
@@ -57,6 +61,8 @@
                 tickAmount: 6,
             },
             tooltip: {
+                shared: false,
+                intersect: true,
                 x: {
                     format: 'dd MMM yyyy'
                 }
@@ -316,17 +322,17 @@
                     success: function(response) { // on success..
 
                         console.log(response.result)
-                        $("#{{ form.market_name.auto_id }}").val('')
-                        $("#{{ form.stock_name.auto_id }}").val('')
-                        $(".stockNameAutoComplete").attr({
-                            'disabled':'disabled',
-                        })
-                        $("#{{ form.start_date.auto_id }}").val('')
-                        $("#{{ form.end_date.auto_id }}").val($.datepicker.formatDate('yy/mm/dd', new Date()))
-                        $("#{{ form.investment_amount.auto_id }}").val('')
-                        $("#moneyPrint").text('')
-                        $('#finalResults').html('')
-                        
+//                        $("#{{ form.market_name.auto_id }}").val('')
+//                        $("#{{ form.stock_name.auto_id }}").val('')
+//                        $(".stockNameAutoComplete").attr({
+//                            'disabled':'disabled',
+//                        })
+//                        $("#{{ form.start_date.auto_id }}").val('')
+//                        $("#{{ form.end_date.auto_id }}").val($.datepicker.formatDate('yy/mm/dd', new Date()))
+//                        $("#{{ form.investment_amount.auto_id }}").val('')
+//                        $("#moneyPrint").text('')
+//                        $('#finalResults').html('')
+//
 
                         options.series[0].data = response.data
                         options.series[0].name = response.stockName

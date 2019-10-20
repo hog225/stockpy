@@ -10,6 +10,7 @@ import pandas as pd
 from .stockData import *
 import datetime
 from django.template import loader
+import re
 
 def convertORMtoStockValueDataFrame(orm_obj):
     df_org = pd.DataFrame(columns=['Date', 'Open', 'High', 'Low', 'Close', 'AdjClose', 'Volume'])
@@ -34,6 +35,7 @@ def if_i_bought_main(request):
         result, cause = form.is_valid()
         print(cause)
         if result:
+
             stock_obj = Stock.objects.get(stock_name = form.cleaned_data['stock_name'])
             # 아래 from, to 지정 필요 !!!!!!!!!!
             sv_objs = StockValue.objects.filter(f_stock_id=stock_obj).order_by('date')
@@ -41,8 +43,8 @@ def if_i_bought_main(request):
             e_date = form.cleaned_data['end_date'].date()
             sv_objs = sv_objs.filter(date__range=(s_date, e_date))
 
-            s_date = sv_objs[0].date
-            e_date = sv_objs[len(sv_objs)-1].date
+            # s_date = sv_objs[0].date
+            # e_date = sv_objs[len(sv_objs)-1].date
 
             valueList = []
             for obj in sv_objs:
@@ -53,17 +55,12 @@ def if_i_bought_main(request):
                     obj.adj_close
                 ])
 
-            b_list = []
-            s_list = []
-            if form.cleaned_data['tech_anal_name'].tech_anal_name == '존버':
-                b_list.append([
-                    s_date.strftime("%Y-%m-%d"),
-                    sv_objs.get(date=s_date).adj_close
-                ])
-                s_list.append([
-                    e_date.strftime("%Y-%m-%d"),
-                    sv_objs.get(date=e_date).adj_close
-                ])
+            balance = int(re.sub("[^\d\.]", "", form.cleaned_data['investment_amount']))
+            df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
+            # 아래 함수 makeResultData 로 대체 되어야함
+            b_list, s_list = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+
+
 
             jsonData = json.dumps({
                 'result': 'Success',
