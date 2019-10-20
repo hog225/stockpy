@@ -15,6 +15,9 @@ class Market(models.Model):
 
 class TechAnal(models.Model):
     tech_anal_name = models.CharField(max_length=50)
+    tech_anal_full_name = models.CharField(max_length=50, null=True)
+    code = models.IntegerField(null=True)
+    comment = models.CharField(max_length=150, null=True)
     pub_date = models.DateTimeField('date published', auto_now_add=True, null=True)
     update_date = models.DateTimeField('data updated', auto_now=True, null=True)
 
