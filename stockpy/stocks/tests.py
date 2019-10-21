@@ -9,7 +9,9 @@ from stocks.views import *
 
 stock_obj = Stock.objects.get(stock_code='005930')
 sv_objs = StockValue.objects.filter(f_stock_id=stock_obj).order_by('date')
-
+df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
+df_stock_val = df_stock_val[500:550]
+df_stock_val = getTradePointFromMomentum(1, df_stock_val)
 a = StockInfoSelectForm({
     "market_name":1,
     "tech_anal_name":1,

@@ -18,5 +18,15 @@
       "tech_anal_full_name": "Average Directional Movement Index",
       "comment": "방향이동 지표를 보조하는 수단 +DI -DI 뚫고 올라가면 매수 신호 반대의 경우 매도 신호"
     }
+  },
+  {
+    "model": "stocks.techanal",
+    "pk": 7,
+    "fields": {
+      "tech_anal_name": "MACD",
+      "code": 7,
+      "tech_anal_full_name": "Moving Average Convergence Divergence",
+      "comment": "이평선들의 수렴 및 발산정도로 MACD Line 이 MACD Signal을 뚫고 올라가면 매수 신호 반대의 경우 매도 신호 fastperiod=12, slowperiod=26, signalperiod=9"
+    }
   }
 ]

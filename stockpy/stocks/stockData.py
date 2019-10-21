@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 import datetime
 import time
 import talib as TA
-
-
+import numpy as np
+import math
 # 하강 패턴
 BEARISH_ENGULFING = 'BE_CDLENGULFING'
 DARK_CLOUD_COVER = 'CDLDARKCLOUDCOVER'
@@ -43,6 +43,9 @@ MA = 6
 MACD = 7
 RSI = 8
 STOCH = 9
+
+BUY = 2.0
+SELL = -2.0
 
 def checkTime(func):
     def decorator(*args, **kwargs):
@@ -155,49 +158,109 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 
     return df_org
 
-def getTradePointFromMomentum(tech_anal_code, stock_val_df):
+def getTradePointFromMomentum(tech_anal_code, df_stock_val):
     buyList = []
     sellList = []
 
-    # 매수든 매도는 매매시그널을 Stock_val_df에 저장 후 리턴
 
-    # 여기서 BuyList SellList 리턴하지 않고 makeResultData 에서 리턴해야 한다.
-    # 아이 함수에선 아직 정확한 매매시점을 찾지 않는다
+    df_stock_val['trade'] = 0
     if tech_anal_code == JONBER:
-        buyList.append([
-            stock_val_df.iloc[0].Date.strftime("%Y-%m-%d"),
-            stock_val_df.iloc[0].AdjClose
-        ])
-        sellList.append([
-            stock_val_df.iloc[-1].Date.strftime("%Y-%m-%d"),
-            stock_val_df.iloc[-1].AdjClose
-        ])
+        df_stock_val.loc[df_stock_val.index[0], 'trade'] = BUY
+        df_stock_val.loc[df_stock_val.index[-1], 'trade'] = SELL
+
     if tech_anal_code == MACD:
+        se_macd, se_macdsignal, se_macdhist = TA.MACD(df_stock_val.AdjClose, fastperiod=12, slowperiod=26, signalperiod=9)
+        se_signal = np.sign(se_macd - se_macdsignal)
+        se_signal = se_signal - se_signal.shift()
+        se_signal[np.isnan(se_signal)] = 0.0
+        df_stock_val['trade'] = se_signal
+        # -2.0 DeadCross 2.0 GoldCross SELL, BUY
 
-        pass
 
-    return buyList, sellList
+    print(df_stock_val['trade'])
+    return df_stock_val
 
 # 다음 에 해야함 패턴 인식을 통한 매매
 def getTradePointFromPatternRecorg(pattern_name, df):
     pass
 
-def makeResultData(stock_val_df, blance):
+def makeResultData(df_stock_val, balance):
     pass
     buyList = []
     sellList = []
-    final_balance = pd.Series()
-    final_asset = pd.Series()
-    final_stock_count = pd.Series()
+
+
+    se_trade = df_stock_val['trade'][df_stock_val['trade'] != 0.0]
+    first_buy_idx = se_trade[se_trade == 2].index[0]
+
+    df_stock_val['Balance'] = 0.0
+    df_stock_val['Asset'] = 0.0
+    df_stock_val['StockCount'] = 0.0
+
+    if first_buy_idx == 0:
+        df_stock_val.loc[0, ['Balance', 'Asset', 'StockCount']] = balance, balance, 0
+    else:
+        df_stock_val.loc[0:first_buy_idx , ['Balance', 'Asset', 'StockCount']] = balance, balance, 0
+
+    beforeIdx = first_buy_idx
+    #for idx, value in se_trade.loc[first_buy_idx:].items():
+    se_idx_list = se_trade.loc[first_buy_idx:].index
+    for idx, realIdx in enumerate(se_idx_list):
+
+        if idx == 0 or \
+                se_trade.loc[realIdx] == BUY and \
+                se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
+
+            stock_count = math.floor(balance / df_stock_val.loc[realIdx].AdjClose)
+            balance -= stock_count * df_stock_val.loc[realIdx].AdjClose
+
+            if idx == len(se_idx_list) - 1:
+                df_stock_val.loc[realIdx: , ['Balance', 'Asset', 'StockCount']] = \
+                    balance, balance + (df_stock_val.loc[realIdx:]['AdjClose']* stock_count), stock_count
+            else:
+                df_stock_val.loc[realIdx:se_idx_list[idx + 1], ['Balance', 'Asset', 'StockCount']] = \
+                    balance, balance + (df_stock_val.loc[realIdx:se_idx_list[idx + 1]]['AdjClose'] * stock_count), stock_count
+
+            buyList.append([
+                df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
+                df_stock_val.loc[realIdx].AdjClose
+            ])
+
+            beforeIdx = realIdx
+
+
+        elif se_trade.loc[realIdx] == SELL and \
+                se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
+            stock_count = df_stock_val.loc[realIdx]['StockCount']
+            balance += stock_count * df_stock_val.loc[realIdx].AdjClose
+            asset = balance
+            stock_count = 0
+
+            if idx == len(se_idx_list) - 1:
+                df_stock_val.loc[realIdx:, ['Balance', 'Asset', 'StockCount']] = \
+                    balance, asset, stock_count
+            else:
+                df_stock_val.loc[realIdx:se_idx_list[idx + 1], ['Balance', 'Asset', 'StockCount']] = \
+                    balance, asset, stock_count
+
+            sellList.append([
+                df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
+                df_stock_val.loc[realIdx].AdjClose
+            ])
+
+            beforeIdx = realIdx
+
+
     # 매매 시점에 따라서 Balance 데이터를 변경 시킴 필요 데이터 Balance(현금), Asset(현금 + 주식가치), Stock Count
-    # 0, 최초 Buy 시점 이후 Balance = Asset 과 같고 Stock COunt 는 0 으로 데이터 채움
+
     # 1, BUY 시점을 찾아서 매수를 때리고 (이때 Buy 리스트 추가 )
     # Stocks 에 산수량 Blance엔 산 수량만큼 차감 이 수치를 다음 Sell Point -1 까지 적용 그리고 Asset 에는 Stock count * 그시점 종가
     # 2, 이 후 Sell Point 시 Stocks 를 0으로 만들고 Blace에 ADD Asset = Balance 다음 Buy point -1 까지 적용
     # 3, 1 ~ 2 번 반복
 
     # 아래 데이터 pd 시리즈 예상
-    return buyList, sellList, final_balance, final_asset, final_stock_count
+    print(df_stock_val)
+    return buyList, sellList, df_stock_val['Balance'], df_stock_val['Asset'], df_stock_val['StockCount']
 
 
 def makeResultText(org_asset, result_asset, ):

@@ -21,6 +21,7 @@ requests==2.22.0
 six==1.12.0
 soupsieve==1.9.4
 sqlparse==0.3.0
+TA-Lib==0.4.17
 urllib3==1.25.6
 webencodings==0.5.1
 xlrd==1.2.0

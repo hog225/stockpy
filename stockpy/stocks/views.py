@@ -58,7 +58,9 @@ def if_i_bought_main(request):
             balance = int(re.sub("[^\d\.]", "", form.cleaned_data['investment_amount']))
             df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
             # 아래 함수 makeResultData 로 대체 되어야함
-            b_list, s_list = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+            df_stock_val = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+            b_list, s_list, se_balance, se_asset, se_stock_count = makeResultData(df_stock_val, balance)
+
 
 
 

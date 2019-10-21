@@ -57,6 +57,7 @@
        ./configure --prefix=/usr
        make
     3. sudo make install
-    4. pip install TA-Lib     
+    4. 가상환경 Enable 
+    5. pip install TA-Lib     
     
     
