@@ -74,9 +74,11 @@ def if_i_bought_main(request):
                 mimetype = 'application/json'
                 return HttpResponse(jsonData, mimetype, status=code)
 
-            resultText = makeResultText(df_stock_val)
-
-
+            org_asset = df_stock_val.iloc[0].Asset
+            last_asset = df_stock_val.iloc[-1].Asset
+            added_asset = last_asset - org_asset
+            final_yield = 100 * (added_asset / org_asset)
+            str_invest_period = getInvestPeriod(df_stock_val.iloc[0].Date, df_stock_val.iloc[-1].Date)
 
             jsonData = json.dumps({
                 'result': 'Success',
@@ -84,7 +86,11 @@ def if_i_bought_main(request):
                 'stockName': form.cleaned_data['stock_name'],
                 'buyList' : b_list,
                 'sellList' : s_list,
-                'resultText' : resultText
+                'orgAsset' : '{:,}'.format(int(org_asset)),
+                'lastAsset': '{:,}'.format(int(last_asset)),
+                'addedAsset': '{:,}'.format(int(added_asset)),
+                'final_yield': '%.2f%%' % final_yield,
+                'period': str_invest_period
             })
 
 
@@ -233,7 +239,7 @@ def updateStockValue(request):
     # 현제 DB의 가장 마지막 Date를 알아낸뒤
     for stock_obj in Stock.objects.all():
         recentDate = StockValue.objects.filter(f_stock_id=stock_obj).order_by('-date')[0].date
-        if datetime.date.today() - recentDate >= datetime.timedelta(days=1) and datetime.datetime.today().hour > 20:
+        if datetime.date.today() - recentDate >= datetime.timedelta(days=1):
             saveStockValue(stock_obj, recentDate)
 
     return redirect('/stocks/index')

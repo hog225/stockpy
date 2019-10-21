@@ -1,0 +1,29 @@
+@font-face {
+    font-family: 'S-CoreDream-9Black';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-9Black.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face { font-family: 'S-CoreDream-2ExtraLight'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-2ExtraLight.woff') format('woff'); font-weight: normal; font-style: normal; }
+
+html,
+body {
+    font-family: "S-CoreDream-2ExtraLight";
+
+}
+#finalCommentTitle{
+    font-family: "S-CoreDream-9Black";
+}
+
+.finalComentContent{
+    font-family: "S-CoreDream-9Black";
+    color: red;
+    font-weight: bold;
+}
+
+.finalComentContentLarge{
+    font-family: "S-CoreDream-9Black";
+    color: blue;
+    font-size: large;
+}

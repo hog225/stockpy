@@ -161,9 +161,6 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
     return df_org
 
 def getTradePointFromMomentum(tech_anal_code, df_stock_val):
-    buyList = []
-    sellList = []
-
 
     df_stock_val['trade'] = 0
     if tech_anal_code == JONBER:
@@ -264,32 +261,26 @@ def makeResultData(df_stock_val, balance):
     # 3, 1 ~ 2 번 반복
 
     # 아래 데이터 pd 시리즈 예상
-    print(df_stock_val)
+    #print(df_stock_val)
     return buyList, sellList, df_stock_val['Balance'], df_stock_val['Asset'], df_stock_val['StockCount']
 
-
-def makeResultText(df_stock_val):
-
-    org_asset = df_stock_val.iloc[0].Asset
-    last_asset = df_stock_val.iloc[-1].Asset
-    final_yield = 100 * ((last_asset - org_asset) / org_asset)
-    r = relativedelta.relativedelta(df_stock_val.iloc[-1].Date, df_stock_val.iloc[0].Date)
+def getInvestPeriod(startDate, EndDate):
+    r = relativedelta.relativedelta(EndDate, startDate)
     if r.years:
-        period_str = '%d 년 %d달 %d일' % (r.years, r.months, r.days)
+        period_str = '%d년 %d개월 %d일' % (r.years, r.months, r.days)
     elif r.months:
-        period_str = '%d달 %d일' % (r.months, r.days)
+        period_str = '%d개월 %d일' % (r.months, r.days)
     elif r.days:
         period_str = '%d일' % (r.days)
 
+    return period_str
 
-    text = '원금 %s원은 투자기간 %s 이후 %s원이 되었습니다. \n' % ('{:,}'.format(int(org_asset)), period_str, '{:,}'.format(int(last_asset)))
-    text += '원금 대비 번 돈은 %s원이며 수익률은 %.2f%% 입니다. \n' % ('{:,}'.format(int(last_asset - org_asset)), final_yield)
-    #text += '초기 주식 보유량은 %d 이고 마지막 보유량은 %d 입니다. \n'
-    #text += '투자 성과가 가장 좋았던 해는 %년 처음 자산 %s 에서 마지막 자산 %s 로 증가 했습니다. \n'
-    # http://www.index.go.kr/potal/stts/idxMain/selectPoSttsIdxSearch.do?idx_cd=1073 / 역대 금리 리스트
-    #text += '원금 %s를 같은 기간동안 은행에 맡겼으면 기준금리 기준 %s원이 되었을 겁니다.'
-    #text += '종합적으로 당신의 투자는 %s 했습니다. \n'
-    return text
+#text += '초기 주식 보유량은 %d 이고 마지막 보유량은 %d 입니다. \n'
+#text += '투자 성과가 가장 좋았던 해는 %년 처음 자산 %s 에서 마지막 자산 %s 로 증가 했습니다. \n'
+# http://www.index.go.kr/potal/stts/idxMain/selectPoSttsIdxSearch.do?idx_cd=1073 / 역대 금리 리스트
+#text += '원금 %s를 같은 기간동안 은행에 맡겼으면 기준금리 기준 %s원이 되었을 겁니다.'
+#text += '종합적으로 당신의 투자는 %s 했습니다. \n'
+
 
 
 

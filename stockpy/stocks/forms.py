@@ -1,14 +1,15 @@
 from .models import *
 import datetime
 import re
+from django.template.defaultfilters import mark_safe
 
 class StockInfoSelectForm(forms.Form):
-    market_name = forms.ModelChoiceField(queryset=Market.objects.all(), label='Market')
+    market_name = forms.ModelChoiceField(queryset=Market.objects.all(), label=mark_safe('<strong>Market</strong>'))
 
     if TechAnal.objects.all().count() > 0:
-        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label='Technical analysis', required=False, initial=1)
+        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False, initial=1)
     else:
-        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label='Technical analysis', required=False)
+        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False)
 
     start_date = forms.DateTimeField(
         input_formats=['%Y/%m/%d'],
@@ -27,7 +28,7 @@ class StockInfoSelectForm(forms.Form):
         })
     )
 
-    stock_name = forms.CharField(max_length=50, label='Stocks', widget=forms.TextInput(
+    stock_name = forms.CharField(max_length=50, label=mark_safe('<strong>Stocks</strong>'), widget=forms.TextInput(
         attrs={
             #'style': 'width: 400px',
             'class': 'stockNameAutoComplete',
@@ -36,7 +37,7 @@ class StockInfoSelectForm(forms.Form):
         }
     ))
 
-    investment_amount = forms.CharField(label='투자금액(원)', widget=forms.TextInput(
+    investment_amount = forms.CharField(label=mark_safe('<strong>투자금액(원)</strong>'), widget=forms.TextInput(
         attrs={
             'type': 'money',
         }
