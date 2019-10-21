@@ -6,6 +6,10 @@ import pandas as pd
 from stocks.models import Stock, Market, StockValue
 from stocks.stockData import *
 from stocks.views import *
+import talib as TA
+import numpy as np
+import math
+
 
 stock_obj = Stock.objects.get(stock_code='005930')
 sv_objs = StockValue.objects.filter(f_stock_id=stock_obj).order_by('date')

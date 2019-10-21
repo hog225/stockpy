@@ -8,6 +8,8 @@ import time
 import talib as TA
 import numpy as np
 import math
+from dateutil import relativedelta
+
 # 하강 패턴
 BEARISH_ENGULFING = 'BE_CDLENGULFING'
 DARK_CLOUD_COVER = 'CDLDARKCLOUDCOVER'
@@ -176,8 +178,8 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         df_stock_val['trade'] = se_signal
         # -2.0 DeadCross 2.0 GoldCross SELL, BUY
 
-
-    print(df_stock_val['trade'])
+    print('Trade List : ')
+    print(df_stock_val['trade'][df_stock_val['trade'] != 0.0])
     return df_stock_val
 
 # 다음 에 해야함 패턴 인식을 통한 매매
@@ -190,7 +192,10 @@ def makeResultData(df_stock_val, balance):
     sellList = []
 
 
+
     se_trade = df_stock_val['trade'][df_stock_val['trade'] != 0.0]
+    if len(se_trade[se_trade == 2].index) == 0:
+        return buyList, sellList, pd.Series(), pd.Series(), pd.Series()
     first_buy_idx = se_trade[se_trade == 2].index[0]
 
     df_stock_val['Balance'] = 0.0
@@ -263,16 +268,28 @@ def makeResultData(df_stock_val, balance):
     return buyList, sellList, df_stock_val['Balance'], df_stock_val['Asset'], df_stock_val['StockCount']
 
 
-def makeResultText(org_asset, result_asset, ):
+def makeResultText(df_stock_val):
 
-    text = '원금 %s원은 투자기간 %s일 이후 %s원이 되었습니다. \n'
-    text += '원금 대비 번 돈은 %s원이며 수익률은 %f% 입니다. \n'
-    text += '초기 주식 보유량은 %d 이고 마지막 보유량은 %d 입니다. \n'
-    text += '투자 성과가 가장 좋았던 해는 %년 처음 자산 %s 에서 마지막 자산 %s 로 증가 했습니다. \n'
+    org_asset = df_stock_val.iloc[0].Asset
+    last_asset = df_stock_val.iloc[-1].Asset
+    final_yield = 100 * ((last_asset - org_asset) / org_asset)
+    r = relativedelta.relativedelta(df_stock_val.iloc[-1].Date, df_stock_val.iloc[0].Date)
+    if r.years:
+        period_str = '%d 년 %d달 %d일' % (r.years, r.months, r.days)
+    elif r.months:
+        period_str = '%d달 %d일' % (r.months, r.days)
+    elif r.days:
+        period_str = '%d일' % (r.days)
+
+
+    text = '원금 %s원은 투자기간 %s 이후 %s원이 되었습니다. \n' % ('{:,}'.format(int(org_asset)), period_str, '{:,}'.format(int(last_asset)))
+    text += '원금 대비 번 돈은 %s원이며 수익률은 %.2f%% 입니다. \n' % ('{:,}'.format(int(last_asset - org_asset)), final_yield)
+    #text += '초기 주식 보유량은 %d 이고 마지막 보유량은 %d 입니다. \n'
+    #text += '투자 성과가 가장 좋았던 해는 %년 처음 자산 %s 에서 마지막 자산 %s 로 증가 했습니다. \n'
     # http://www.index.go.kr/potal/stts/idxMain/selectPoSttsIdxSearch.do?idx_cd=1073 / 역대 금리 리스트
     #text += '원금 %s를 같은 기간동안 은행에 맡겼으면 기준금리 기준 %s원이 되었을 겁니다.'
-    text += '종합적으로 당신의 투자는 %s 했습니다. \n'
-
+    #text += '종합적으로 당신의 투자는 %s 했습니다. \n'
+    return text
 
 
 

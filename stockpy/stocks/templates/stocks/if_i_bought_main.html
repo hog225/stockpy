@@ -61,8 +61,7 @@
                 tickAmount: 6,
             },
             tooltip: {
-                shared: false,
-                intersect: true,
+             
                 x: {
                     format: 'dd MMM yyyy'
                 }
@@ -264,6 +263,10 @@
         </div>
     </div>
 
+    <div id="resultText" class="co1-12">
+        
+
+    </div>
 </form>
 <hr class="mt-0 mb-4">
 
@@ -402,9 +405,14 @@
                         );
 
                         chart.render()
+                        $('#resultText').html("<div class='alert-box alert radius' data-alert>결과 <br />"
+                            + response.resultText.replace(/\n/g, "<br />") + " <a href='#' class='close'>&times;</a></div>")
+                        
+                        
+
                     },
                     error : function(xhr, errmsg, err) {
-                        $('#finalResults').html("<div class='alert-box alert radius' data-alert>에러 발생 !! : "
+                        $('#finalResults').html("<div class='alert-box alert radius' data-alert>에러 발생 : "
                             +xhr.responseJSON["result"]+ " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
                         console.log(xhr.status + ": " + xhr.responseJSON["result"]); // provide a bit more info about the error to the console
                     }

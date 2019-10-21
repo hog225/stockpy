@@ -56,11 +56,25 @@ def if_i_bought_main(request):
                 ])
 
             balance = int(re.sub("[^\d\.]", "", form.cleaned_data['investment_amount']))
+            if balance < sv_objs[0].adj_close:
+                resStr = "입력한 투자금액으로는 한 주도 살 수 없습니다. %s원 이상으로 입력해주세요!" % '{:,}'.format(int(sv_objs[0].adj_close))
+                jsonData = json.dumps({'result': resStr})
+                code = 400
+                mimetype = 'application/json'
+                return HttpResponse(jsonData, mimetype, status=code)
+
             df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
             # 아래 함수 makeResultData 로 대체 되어야함
             df_stock_val = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
             b_list, s_list, se_balance, se_asset, se_stock_count = makeResultData(df_stock_val, balance)
+            if b_list == []:
+                resStr = "요청한 기술적 분석으로 거래가 이루어지지 않았습니다. 기간을 변경해 보시거나 기술적 분석 전략을 변경해 보세요!"
+                jsonData = json.dumps({'result': resStr})
+                code = 400
+                mimetype = 'application/json'
+                return HttpResponse(jsonData, mimetype, status=code)
 
+            resultText = makeResultText(df_stock_val)
 
 
 
@@ -70,7 +84,7 @@ def if_i_bought_main(request):
                 'stockName': form.cleaned_data['stock_name'],
                 'buyList' : b_list,
                 'sellList' : s_list,
-
+                'resultText' : resultText
             })
 
 
