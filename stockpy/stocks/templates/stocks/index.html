@@ -1,14 +1,87 @@
 {% extends 'stocks/base.html' %}
+{% load static %}
+
 
 {% block title %}Hello ~{% endblock %}
 {% block content %}
-<div class="col-lg-12 text-center">
-    <h1 class="mt-5">lifeonroom lab</h1>
-    <p class="lead">여러가지 증권 실험들이 추가될 계획입니다. ! </p>
+    <div class="col-lg-12 text-center">
+        <h1 class="mt-5" >lifeonroom lab</h1>
+        <p class="lead">여러가지 증권 실험들이 추가될 계획입니다. ! </p>
 
-    <ul class="list-unstyled">
-        <li>소셜아이콘 추가하기 (유튜브, 워드프레스)</li>
-        <li>할수 있는 어플리케이션 카드 추가 하기</li>
-    </ul>
-</div>
+        <ul class="list-unstyled">
+            <!--<li>-->
+            <!--<a href="https://www.youtube.com/channel/UCqjw0PUvq3-k0ry1iLr1q4g" target="_blank">-->
+            <!--<img src="{% static 'img/youtube-flat.svg' %}" width="44" height="44" alt="My Image" >-->
+            <!--</a>-->
+            <!--</li>-->
+            <li>구독 좋아요 댓글 가즈아 ~!</li>
+            &nbsp;
+            <li>
+                <a href="https://www.youtube.com/channel/UCqjw0PUvq3-k0ry1iLr1q4g" target="_blank" style="color:black">
+                    <i class="fa fa-youtube-play fa-3x"></i>
+                </a>
+                &nbsp;
+                <a href="https://lifeonroom.com/" target="_blank" style="color:black">
+                    <i class="fa fa-wordpress fa-3x"></i>
+                </a>
+            </li>
+
+        </ul>
+
+
+
+
+
+    </div>
+
+    <hr class="mt-4 mb-4">
+    <div class="row">
+        <div class="col-4">
+        <figure class="snip1200">
+            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sq-sample27.jpg" alt="sq-sample27" />
+            <figcaption>
+                <p>그 주식 그때 샀어야 했는데.. </p>
+                <div class="heading">
+                    <h2><span> 머니랩</span></h2>
+                </div>
+            </figcaption>
+            <a href="{% url 'if_i_bought_main' %}"></a>
+        </figure>
+        </div>
+        <div class="col-4">
+        <figure class="snip1200">
+            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sq-sample31.jpg" alt="sq-sample31" />
+            <figcaption>
+                <p>비타민도 잘 먹어야지 (준비중)</p>
+                <div class="heading">
+                    <h2><span> 헬스랩</span></h2>
+                </div>
+            </figcaption>
+            <a href="#"></a>
+        </figure>
+        </div>
+        <div class="col-4">
+        <figure class="snip1200">
+            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sq-sample32.jpg" alt="sq-sample32" />
+            <figcaption>
+                <p>아직 계획 없음 .. ㅋㅋ</p>
+                <div class="heading">
+                    <h2><span> LAB</span></h2>
+                </div>
+            </figcaption>
+            <a href="#"></a>
+        </figure>
+        </div>
+    </div>
+
+    <script>
+
+        $(".hover").mouseleave(
+            function () {
+                $(this).removeClass("hover");
+            }
+        );
+    </script>
+
+
 {% endblock %}

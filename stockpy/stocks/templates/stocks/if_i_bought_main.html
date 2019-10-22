@@ -13,8 +13,8 @@
     <script type="text/javascript">
         var options = {
             chart: {
-                type: 'area',
-                stacked: false,
+                type: 'line',
+                fontFamily: 'S-CoreDream-9Black',
                 height: 350,
 //                zoom: {
 //                    type: 'x',
@@ -26,6 +26,17 @@
 //                }
 
             },
+            stroke: {
+                show: true,
+                curve: 'smooth',
+                lineCap: 'butt',
+
+                width: 2,
+                dashArray: 0,
+
+
+            },
+
             dataLabels: {
                 enabled: false
             },
@@ -251,7 +262,7 @@
 
     </div>
 
-    <input type="submit" class="btn btn-success"></input>
+    <input type="submit" class="btn btn-dark"></input>
     <div id="finalResults" class="co1-12">
 
     </div>
@@ -277,9 +288,9 @@
 
         </div>
         {% if user.is_authenticated and user.is_superuser %}
-            <button type="submit" class="btn btn-success">CreateStockData</button>
+            <button type="submit" class="btn btn-dark">CreateStockData</button>
         {% else %}
-            <button type="submit" class="btn btn-success" style="display: none;">CreateStockData</button>
+            <button type="submit" class="btn btn-dark" style="display: none;">CreateStockData</button>
         {% endif %}
     </form>
     &nbsp;
@@ -289,9 +300,9 @@
 
         </div>
         {% if user.is_authenticated and user.is_superuser %}
-            <button type="submit" class="btn btn-success">UpdateMarket</button>
+            <button type="submit" class="btn btn-dark">UpdateMarket</button>
         {% else %}
-            <button type="submit" class="btn btn-success" style="display: none;">UpdateMarket</button>
+            <button type="submit" class="btn btn-dark" style="display: none;">UpdateMarket</button>
         {% endif %}
     </form>
     &nbsp;
@@ -301,9 +312,8 @@
 
         </div>
         {% if user.is_authenticated and user.is_superuser %}
-            <button type="submit" class="btn btn-success">UpdateStockValue</button>
+            <button type="submit" class="btn btn-dark">UpdateStockValue</button>
         {% else %}
-            <button type="submit" class="btn btn-success" style="display: none;">UpdateStockValue</button>
         {% endif %}
     </form>
 </div>

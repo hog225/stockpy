@@ -74,7 +74,7 @@ def if_i_bought_main(request):
 
             df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
 
-            res, overlayChartSet, overlayNameList = makeOverlayChartData(df_stock_val, MA, {'ma_5': 5})
+            res, overlayChartSet, overlayNameList = makeOverlayChartData(df_stock_val, MA, {'ma_5': 5, 'ma_10': 10, 'ma_25': 25})
 
             # 아래 함수 makeResultData 로 대체 되어야함
             df_stock_val = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
