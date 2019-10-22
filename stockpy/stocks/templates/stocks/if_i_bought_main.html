@@ -14,7 +14,7 @@
         var options = {
             chart: {
                 type: 'area',
-//                stacked: false,
+                stacked: false,
                 height: 350,
 //                zoom: {
 //                    type: 'x',
@@ -316,6 +316,7 @@
         x = "John";      // Now x is a String
 
         $(function() {
+            var clickCount = 0;
             $("#measureBtn").on('submit', function(event) {
                 event.preventDefault();
                 $.ajax({ // create an AJAX call...
@@ -336,16 +337,29 @@
 //                        $("#moneyPrint").text('')
 //                        $('#finalResults').html('')
 //
+                        options.series = []
 
-                        options.series[0].data = response.data
+                        options.series.push({
+                            "data" : response.data,
+                            "name" : response.stockName,
+                        })
                         options.series[0].name = response.stockName
+                        
+                        for (var idx=0; idx < response.overlayChartList.length; idx++)
+                        {
+                            options.series.push({
+                                "name": response.overlayNameList[idx],
+                                "data": response.overlayChartList[idx]
+
+                            })
+                        }
                         options.title.text = response.stockName
                         options.annotations.points = []
-                        console.log(response.buyList.length)
+                        //console.log(response.buyList.length)
 
                         for (var idx =0; idx< response.buyList.length; idx++)
                         {
-                            console.log(response.buyList[idx][0], response.buyList[idx][1])
+                            //console.log(response.buyList[idx][0], response.buyList[idx][1])
                             options.annotations.points.push({
                                 // butList 의 내부 List: 0 은 date, 1은 Adj Close
                                 x: new Date(response.buyList[idx][0]).getTime(),
@@ -371,7 +385,7 @@
                         }
                         for (var idx =0; idx< response.sellList.length; idx++)
                         {
-                            console.log(response.sellList[idx][0], response.sellList[idx][1])
+                            
                             options.annotations.points.push({
                                 // sellList 의 내부 List: 0 은 date, 1은 Adj Close
                                 x: new Date(response.sellList[idx][0]).getTime(),
@@ -398,6 +412,9 @@
                         }
                         //options.annotations.xaxis[0].x = response
                         $("#chart").html('')
+                        $('#finalResults').html('')
+                        clickCount = clickCount + 1
+                        console.log('Click Count: ' + clickCount)
 
                         var chart = new ApexCharts(
                             document.querySelector("#chart"),
@@ -405,11 +422,26 @@
                         );
 
                         chart.render()
-                        $('#resultText').html("<div class='alert-box alert radius' data-alert>" +
-                            "<h3 id='finalCommentTitle'>결과</h3> <br />" +
-                                "<p>원금 " + "<b>" + response.orgAsset + "</b>" + "원은 투자기간 " + "<b class='finalComentContent'>" + response.period + "</b>" + " 후 " + "<b class='finalComentContent'>" + response.lastAsset + "</b>" + "원이 되었습니다.</p> <br />" +
-                                "<p>원금 대비 번 돈은 " + "<b class='finalComentContent'>" + response.addedAsset +"</b>"+ "원이며 수익률은 " + "<b class='finalComentContentLarge'>" + response.final_yield + "</b>" + "입니다.</p>" +
-                            " <a href='#' class='close'>&times;</a></div>")
+                        if ((clickCount != 0) && (clickCount % 3 == 0))
+                        {
+                            $('#resultText').html("<p id='finalCommentTitle'>클릭 시 결과 출력 ! </p>")
+                            $('#resultText').click(function(){
+                                $('#resultText').html("<div class='alert-box alert radius' data-alert>" +
+                                "<h3 id='finalCommentTitle'>결과</h3> <br />" +
+                                    "<p>원금 " + "<b>" + response.orgAsset + "</b>" + "원은 투자기간 " + "<b class='finalComentContent'>" + response.period + "</b>" + " 후 " + "<b class='finalComentContent'>" + response.lastAsset + "</b>" + "원이 되었습니다.</p> <br />" +
+                                    "<p>원금 대비 번 돈은 " + "<b class='finalComentContent'>" + response.addedAsset +"</b>"+ "원이며 수익률은 " + "<b class='finalComentContentLarge'>" + response.final_yield + "</b>" + "입니다.</p>" +
+                                " <a href='#' class='close'>&times;</a></div>")
+
+                            })
+                        }
+                        else{
+
+                            $('#resultText').html("<div class='alert-box alert radius' data-alert>" +
+                                "<h3 id='finalCommentTitle'>결과</h3> <br />" +
+                                    "<p>원금 " + "<b>" + response.orgAsset + "</b>" + "원은 투자기간 " + "<b class='finalComentContent'>" + response.period + "</b>" + " 후 " + "<b class='finalComentContent'>" + response.lastAsset + "</b>" + "원이 되었습니다.</p> <br />" +
+                                    "<p>원금 대비 번 돈은 " + "<b class='finalComentContent'>" + response.addedAsset +"</b>"+ "원이며 수익률은 " + "<b class='finalComentContentLarge'>" + response.final_yield + "</b>" + "입니다.</p>" +
+                                " <a href='#' class='close'>&times;</a></div>")
+                        }
                         
                         
 

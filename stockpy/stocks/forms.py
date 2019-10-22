@@ -74,6 +74,9 @@ class StockInfoSelectForm(forms.Form):
             print(e)
             return False, 'Invalid Date Format'
 
+        if (self.cleaned_data['end_date'].date() - self.cleaned_data['start_date'].date()).days < 1:
+            return False, '투자 종료일이 시작일과 얼마 차이 나지 않거나 빠릅니다.'
+
         try:
             money = re.sub("[^\d\.]", "", self.cleaned_data['investment_amount'])
 

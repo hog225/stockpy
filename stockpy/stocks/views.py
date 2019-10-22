@@ -43,6 +43,12 @@ def if_i_bought_main(request):
             e_date = form.cleaned_data['end_date'].date()
             sv_objs = sv_objs.filter(date__range=(s_date, e_date))
 
+            if len(sv_objs) < 2:
+                resStr = "최소한 2 비지니스 데이 이상의 기간을 입력해 주세요"
+                jsonData = json.dumps({'result': resStr})
+                code = 400
+                mimetype = 'application/json'
+                return HttpResponse(jsonData, mimetype, status=code)
             # s_date = sv_objs[0].date
             # e_date = sv_objs[len(sv_objs)-1].date
 
@@ -55,6 +61,9 @@ def if_i_bought_main(request):
                     obj.adj_close
                 ])
 
+
+
+
             balance = int(re.sub("[^\d\.]", "", form.cleaned_data['investment_amount']))
             if balance < sv_objs[0].adj_close:
                 resStr = "입력한 투자금액으로는 한 주도 살 수 없습니다. %s원 이상으로 입력해주세요!" % '{:,}'.format(int(sv_objs[0].adj_close))
@@ -64,6 +73,9 @@ def if_i_bought_main(request):
                 return HttpResponse(jsonData, mimetype, status=code)
 
             df_stock_val = convertORMtoStockValueDataFrame(sv_objs)
+
+            res, overlayChartSet, overlayNameList = makeOverlayChartData(df_stock_val, MA, {'ma_5': 5})
+
             # 아래 함수 makeResultData 로 대체 되어야함
             df_stock_val = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
             b_list, s_list, se_balance, se_asset, se_stock_count = makeResultData(df_stock_val, balance)
@@ -90,7 +102,9 @@ def if_i_bought_main(request):
                 'lastAsset': '{:,}'.format(int(last_asset)),
                 'addedAsset': '{:,}'.format(int(added_asset)),
                 'final_yield': '%.2f%%' % final_yield,
-                'period': str_invest_period
+                'period': str_invest_period,
+                'overlayNameList': overlayNameList,
+                'overlayChartList': overlayChartSet
             })
 
 

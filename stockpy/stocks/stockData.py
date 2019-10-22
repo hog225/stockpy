@@ -36,15 +36,16 @@ HARAMI = 'CDLHARAMI'
 # --------------------------------------------------
 
 # MOMENTUM INDICATOR
-JONBER = 1
-ADX = 2 # Average Directional Movement Index 방향이동 지표를 보조하는 수단 +DI -DI 뚫고 올라가면 매수 신호 반대의 경우 매도 신호
-APO = 3 # Absolute Price Oscillator 두 지수 이동 평균의 차를 표시함 0 위로 뚫고 올라가면 매수 신호 반대의 경우 매도 신호
-AROONOSC = 4 # Aroon Oscillator 오실레이터가 0을 뚫고 올라가면 상승 트렌드 시작 반대면 하강 트렌드
-CCI = 5 # Commodity channel index Donald Lambert 과매수 과매도를 판단하기 위해 사용됨 70 ~80 들갔다가 내려오면 매도 , 20 ~30 들갔다가 올라올때 매수
-MA = 6
-MACD = 7
-RSI = 8
-STOCH = 9
+JONBER = 1  #1차
+MA = 2      #2차 아직 넣기에는 좀 ..
+MACD = 3    #1차
+RSI = 4     #1차
+STOCH = 5   #1차
+
+ADX = 6 # Average Directional Movement Index 방향이동 지표를 보조하는 수단 +DI -DI 뚫고 올라가면 매수 신호 반대의 경우 매도 신호
+APO = 7 # Absolute Price Oscillator 두 지수 이동 평균의 차를 표시함 0 위로 뚫고 올라가면 매수 신호 반대의 경우 매도 신호
+AROONOSC = 8 # Aroon Oscillator 오실레이터가 0을 뚫고 올라가면 상승 트렌드 시작 반대면 하강 트렌드
+CCI = 9 # Commodity channel index Donald Lambert 과매수 과매도를 판단하기 위해 사용됨 70 ~80 들갔다가 내려오면 매도 , 20 ~30 들갔다가 올라올때 매수
 
 BUY = 2.0
 SELL = -2.0
@@ -167,7 +168,7 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         df_stock_val.loc[df_stock_val.index[0], 'trade'] = BUY
         df_stock_val.loc[df_stock_val.index[-1], 'trade'] = SELL
 
-    if tech_anal_code == MACD:
+    elif tech_anal_code == MACD:
         se_macd, se_macdsignal, se_macdhist = TA.MACD(df_stock_val.AdjClose, fastperiod=12, slowperiod=26, signalperiod=9)
         se_signal = np.sign(se_macd - se_macdsignal)
         se_signal = se_signal - se_signal.shift()
@@ -182,6 +183,23 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
 # 다음 에 해야함 패턴 인식을 통한 매매
 def getTradePointFromPatternRecorg(pattern_name, df):
     pass
+
+def makeOverlayChartData(df_stock_val, code, period_dict):
+    if code == MA:
+        result_ma = []
+        result_name = []
+        for name, peri in period_dict.items():
+
+            tmpMA = TA.MA(df_stock_val.AdjClose, timeperiod=peri, matype=0)
+
+            tmpDF = pd.DataFrame({'Date': df_stock_val['Date'].apply(lambda x:x.strftime("%Y-%m-%d")), 'AdjClose': tmpMA})
+            tmpDF = tmpDF[~np.isnan(tmpDF['AdjClose'])]
+            result_ma.append(tmpDF.values.tolist())
+            result_name.append(name)
+        return True, result_ma, result_name
+    return False, [], []
+
+
 
 def makeResultData(df_stock_val, balance):
     pass
