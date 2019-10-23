@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render_to_response, render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from .forms import StockInfoSelectForm
 from .models import Stock, Market, StockValue
@@ -9,7 +9,7 @@ import json
 import pandas as pd
 from .stockData import *
 import datetime
-from django.template import loader
+from django.template import loader, RequestContext
 import re
 
 def convertORMtoStockValueDataFrame(orm_obj):
@@ -61,9 +61,6 @@ def if_i_bought_main(request):
                     obj.adj_close
                 ])
 
-
-
-
             balance = int(re.sub("[^\d\.]", "", form.cleaned_data['investment_amount']))
             if balance < sv_objs[0].adj_close:
                 resStr = "입력한 투자금액으로는 한 주도 살 수 없습니다. %s원 이상으로 입력해주세요!" % '{:,}'.format(int(sv_objs[0].adj_close))
@@ -77,7 +74,10 @@ def if_i_bought_main(request):
             res, overlayChartSet, overlayNameList = makeOverlayChartData(df_stock_val, MA, {'ma_5': 5, 'ma_10': 10, 'ma_25': 25})
 
             # 아래 함수 makeResultData 로 대체 되어야함
-            df_stock_val = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+
+            df_stock_val, sup_chart_dat, sup_name_dat = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+
+
             b_list, s_list, se_balance, se_asset, se_stock_count = makeResultData(df_stock_val, balance)
             if b_list == []:
                 resStr = "요청한 기술적 분석으로 거래가 이루어지지 않았습니다. 기간을 변경해 보시거나 기술적 분석 전략을 변경해 보세요!"
@@ -104,7 +104,9 @@ def if_i_bought_main(request):
                 'final_yield': '%.2f%%' % final_yield,
                 'period': str_invest_period,
                 'overlayNameList': overlayNameList,
-                'overlayChartList': overlayChartSet
+                'overlayChartList': overlayChartSet,
+                'supplyIndicatorList': sup_chart_dat,
+                'supplyIndicatorNameList': sup_name_dat
             })
 
 
@@ -295,3 +297,32 @@ def marketSelectAjax(request):
 
         return HttpResponse(json_data, 'application/json')
     return HttpResponse(status=404)
+
+# 404
+def page_not_found(request, exception):
+    context = {
+        'code' : '404',
+        'text' : "The page you requested was not found."
+    }
+    return render(request, 'stocks/error_page.html', context, status=404)
+# 400
+def bad_request(request, exception):
+    context = {
+        'code' : '400',
+        'text' : "The page you requested was bad request"
+    }
+    return render(request, 'stocks/error_page.html', context, status=400)
+#403
+def permission_denied(request, exception):
+    context = {
+        'code' : '403',
+        'text' : "You have no permission."
+    }
+    return render(request, 'stocks/error_page.html', context, status=403)
+#500
+def server_error(request):
+    context = {
+        'code' : '500',
+        'text' : "Internal Server Error."
+    }
+    return render(request, 'stocks/error_page.html', context, status=500)

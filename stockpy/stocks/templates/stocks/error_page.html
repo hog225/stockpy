@@ -1,0 +1,27 @@
+{% load static %}
+
+<html lang="en">
+<head>
+        <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+        <script src='{% static "stocks/vendor/bootstrap/js/bootstrap.bundle.min.js" %}'></script>
+        <script src='{% static "stocks/vendor/bootstrap/js/bootstrap.min.js" %}'></script>
+        <link href='{% static "stocks/vendor/bootstrap/css/bootstrap.min.css" %}'  rel="stylesheet" id="bootstrap-css">
+
+        <style type="text/css">
+            #main {
+                height: 100vh;
+            }
+        </style>
+
+</head>
+<body>
+    <div class="d-flex justify-content-center align-items-center" id="main">
+        <h1 class="mr-3 pr-3 align-top border-right inline-block align-content-center">{{ code }}</h1>
+        <div class="inline-block align-middle">
+            <h2 class="font-weight-normal lead" id="desc">{{ text }}</h2>
+            <a href="{% url 'index' %}"><button class="btn btn-dark" >Go HOME</button></a>
+
+        </div>
+    </div>
+</body>
+</html>

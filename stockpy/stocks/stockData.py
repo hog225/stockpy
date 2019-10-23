@@ -162,7 +162,8 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
     return df_org
 
 def getTradePointFromMomentum(tech_anal_code, df_stock_val):
-
+    chart_dat_res = []
+    chart_name_res = []
     df_stock_val['trade'] = 0
     if tech_anal_code == JONBER:
         df_stock_val.loc[df_stock_val.index[0], 'trade'] = BUY
@@ -176,9 +177,31 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         df_stock_val['trade'] = se_signal
         # -2.0 DeadCross 2.0 GoldCross SELL, BUY
 
+        # make chart data
+        chart_dat_res.append(pd.DataFrame({
+            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macd.where(pd.notnull(se_macd), None)
+        }).values.tolist())
+
+        # tmpDF = pd.DataFrame({
+        #     'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macd
+        # })
+        # tmpDF = tmpDF[~np.isnan(tmpDF['AdjClose'])]
+        # chart_dat_res.append(tmpDF.values.tolist())
+
+        chart_dat_res.append(pd.DataFrame({
+            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macdsignal.where(pd.notnull(se_macdsignal), None)
+        }).values.tolist())
+        # tmpDF = pd.DataFrame({
+        #     'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macdsignal
+        # })
+        # tmpDF = tmpDF[~np.isnan(tmpDF['AdjClose'])]
+        # chart_dat_res.append(tmpDF.values.tolist())
+        chart_name_res = ['MACD(12, 26)', 'MACD Signal(9)']
+
+
     print('Trade List : ')
     print(df_stock_val['trade'][df_stock_val['trade'] != 0.0])
-    return df_stock_val
+    return df_stock_val, chart_dat_res, chart_name_res
 
 # 다음 에 해야함 패턴 인식을 통한 매매
 def getTradePointFromPatternRecorg(pattern_name, df):
@@ -202,7 +225,6 @@ def makeOverlayChartData(df_stock_val, code, period_dict):
 
 
 def makeResultData(df_stock_val, balance):
-    pass
     buyList = []
     sellList = []
 
