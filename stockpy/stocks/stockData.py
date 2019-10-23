@@ -169,6 +169,7 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         df_stock_val.loc[df_stock_val.index[0], 'trade'] = BUY
         df_stock_val.loc[df_stock_val.index[-1], 'trade'] = SELL
 
+    # MACD
     elif tech_anal_code == MACD:
         se_macd, se_macdsignal, se_macdhist = TA.MACD(df_stock_val.AdjClose, fastperiod=12, slowperiod=26, signalperiod=9)
         se_signal = np.sign(se_macd - se_macdsignal)
@@ -182,21 +183,50 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
             'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macd.where(pd.notnull(se_macd), None)
         }).values.tolist())
 
-        # tmpDF = pd.DataFrame({
-        #     'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macd
-        # })
-        # tmpDF = tmpDF[~np.isnan(tmpDF['AdjClose'])]
-        # chart_dat_res.append(tmpDF.values.tolist())
-
         chart_dat_res.append(pd.DataFrame({
             'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macdsignal.where(pd.notnull(se_macdsignal), None)
         }).values.tolist())
-        # tmpDF = pd.DataFrame({
-        #     'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macdsignal
-        # })
-        # tmpDF = tmpDF[~np.isnan(tmpDF['AdjClose'])]
-        # chart_dat_res.append(tmpDF.values.tolist())
+
         chart_name_res = ['MACD(12, 26)', 'MACD Signal(9)']
+
+    # STHOCH
+    elif tech_anal_code == STOCH:
+        SELL_LINE = 70
+        BUY_LINE = 30
+
+        slowk, slowd = TA.STOCH(df_stock_val.High, df_stock_val.Low, df_stock_val.AdjClose,\
+                                fastk_period=12, slowk_period=5, slowk_matype=0, slowd_period=5, slowd_matype=0)
+        slowk = slowk.round(2)
+        slowd = slowd.round(2)
+        tmpd = slowd.copy()
+
+        se_signal = np.sign(slowk-slowd)
+        se_signal[se_signal==0] = 1
+        se_signal = se_signal - se_signal.shift()
+        #tmp_se_signal = se_signal.copy()
+
+        # Slow D 가 25% 이하에서 %K 가 %d 를 상향 돌파시 매수
+        # Slow D 가 75% 이상에서 %K 가 %d 를 하향 돌파시 매도
+
+        # slowd 중 기준라인 사이의 값은 영으로 만든다
+        se_signal.loc[(tmpd > BUY_LINE) & (tmpd < SELL_LINE)] = 0
+        # BUY LINE 밑에있는 매도 신호는 지운다
+        se_signal[(tmpd <= BUY_LINE) & (tmpd != 0) & (se_signal == -2)] = 0
+        # BUY LINE 위에 있는 매수 신호는 지운다 .
+        se_signal[(tmpd >= SELL_LINE) & (tmpd != 0) & (se_signal == 2)] = 0
+        se_signal[np.isnan(se_signal)] = 0.0
+        #testDf = pd.DataFrame({'A':se_signal, 'B':slowd, 'C':tmp_se_signal})
+        df_stock_val['trade'] = se_signal
+
+        chart_dat_res.append(pd.DataFrame({
+            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': slowk.where(pd.notnull(slowk), None)
+        }).values.tolist())
+
+        chart_dat_res.append(pd.DataFrame({
+            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': slowd.where(pd.notnull(slowd), None)
+        }).values.tolist())
+
+        chart_name_res = ['slowk(12, 5)', 'slowd(5)']
 
 
     print('Trade List : ')
@@ -252,7 +282,7 @@ def makeResultData(df_stock_val, balance):
         if idx == 0 or \
                 se_trade.loc[realIdx] == BUY and \
                 se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
-
+            print('buy', beforeIdx, realIdx)
             stock_count = math.floor(balance / df_stock_val.loc[realIdx].AdjClose)
             balance -= stock_count * df_stock_val.loc[realIdx].AdjClose
 
@@ -273,6 +303,7 @@ def makeResultData(df_stock_val, balance):
 
         elif se_trade.loc[realIdx] == SELL and \
                 se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
+            print('sell', beforeIdx, realIdx)
             stock_count = df_stock_val.loc[realIdx]['StockCount']
             balance += stock_count * df_stock_val.loc[realIdx].AdjClose
             asset = balance
@@ -301,7 +332,10 @@ def makeResultData(df_stock_val, balance):
     # 3, 1 ~ 2 번 반복
 
     # 아래 데이터 pd 시리즈 예상
-    #print(df_stock_val)
+    print(df_stock_val)
+
+    # for i in df_stock_val['Asset'].iteritems():
+    #     print(i)
     return buyList, sellList, df_stock_val['Balance'], df_stock_val['Asset'], df_stock_val['StockCount']
 
 def getInvestPeriod(startDate, EndDate):
