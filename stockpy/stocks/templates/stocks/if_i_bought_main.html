@@ -20,8 +20,6 @@
 
                 width: 2,
                 dashArray: 0,
-
-
             },
 
             dataLabels: {
@@ -192,7 +190,6 @@
                         data:{'selectedVal':selectedVal, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
                         success:function(result){
                             console.log(result)
-
                         }
                     });
                 }
@@ -255,6 +252,7 @@
     <div class="row">
         <div class="col-6">
             {{ form.market_name|as_crispy_field }}
+
         </div>
         <div class="col-6">
             {{ form.tech_anal_name|as_crispy_field }}
@@ -368,6 +366,7 @@
             var clickCount = 0;
             var supplyIndicatorChart;
             var chart;
+            $('[data-toggle="tooltip"]').tooltip()
             $("#measureBtn").on('submit', function(event) {
                 event.preventDefault();
                 $.ajax({ // create an AJAX call...

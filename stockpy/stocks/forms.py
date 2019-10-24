@@ -3,11 +3,33 @@ import datetime
 import re
 from django.template.defaultfilters import mark_safe
 
+class techAnalWidget(forms.Select):
+    def __init__(self, *args, **kwargs):
+        # attribute for select
+        cus_attrs = {
+            'name': "opts"
+            # 'data-toggle': "tooltip",
+            # 'data-placement': "bottom",
+
+        }
+        super().__init__(cus_attrs, *args, **kwargs)
+
+    def create_option(self, name, value, *args, **kwargs):
+        option = super().create_option(name, value, *args, **kwargs)
+        if value:
+            tech_anal = self.choices.queryset.get(pk=value)
+            option['attrs']['title'] = tech_anal.comment  # set option attribute
+            option['attrs']['data-toggle'] = "tooltip"  # set option attribute
+            option['attrs']['data-placement'] = "right"  # set option attribute
+
+        return option
+
 class StockInfoSelectForm(forms.Form):
     market_name = forms.ModelChoiceField(queryset=Market.objects.all(), label=mark_safe('<strong>Market</strong>'))
 
     if TechAnal.objects.all().count() > 0:
-        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False, initial=1)
+        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'),
+                                                required=False, initial=1, widget=techAnalWidget)
     else:
         tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False)
 
