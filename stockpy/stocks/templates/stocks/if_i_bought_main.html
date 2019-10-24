@@ -103,11 +103,7 @@
                 data: []
             }],
             annotations: {
-                yaxis: [{
-                y: 0,
-                borderColor: '#000000',
-
-            }]
+                yaxis: []
             },
             title: {
                 text: '보조지표',
@@ -394,6 +390,7 @@
 //
                         options.series = []
                         options2.series = []
+                        options2.annotations.yaxis = []
                         
                         options.series.push({
                             "data" : response.data,
@@ -421,6 +418,14 @@
                                 "name": response.supplyIndicatorNameList[idx],
                                 "data": response.supplyIndicatorList[idx]
 
+                            })
+                        }
+
+                        for (var idx=0; idx < response.supplyIndicatorBaseLine.length; idx++)
+                        {
+                            options2.annotations.yaxis.push({
+                                'y': response.supplyIndicatorBaseLine[idx],
+                                'borderColor': '#000000'
                             })
                         }
                         

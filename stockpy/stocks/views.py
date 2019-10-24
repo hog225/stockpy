@@ -75,7 +75,7 @@ def if_i_bought_main(request):
 
             # 아래 함수 makeResultData 로 대체 되어야함
 
-            df_stock_val, sup_chart_dat, sup_name_dat = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
+            df_stock_val, sup_chart_dat, sup_name_dat, base_line = getTradePointFromMomentum(form.cleaned_data['tech_anal_name'].code, df_stock_val)
 
 
             b_list, s_list, se_balance, se_asset, se_stock_count = makeResultData(df_stock_val, balance)
@@ -106,7 +106,8 @@ def if_i_bought_main(request):
                 'overlayNameList': overlayNameList,
                 'overlayChartList': overlayChartSet,
                 'supplyIndicatorList': sup_chart_dat,
-                'supplyIndicatorNameList': sup_name_dat
+                'supplyIndicatorNameList': sup_name_dat,
+                'supplyIndicatorBaseLine' : base_line
             })
 
 

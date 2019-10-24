@@ -164,6 +164,7 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 def getTradePointFromMomentum(tech_anal_code, df_stock_val):
     chart_dat_res = []
     chart_name_res = []
+    base_line = []
     df_stock_val['trade'] = 0
     if tech_anal_code == JONBER:
         df_stock_val.loc[df_stock_val.index[0], 'trade'] = BUY
@@ -188,6 +189,7 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         }).values.tolist())
 
         chart_name_res = ['MACD(12, 26)', 'MACD Signal(9)']
+        base_line = [0]
 
     # STHOCH
     elif tech_anal_code == STOCH:
@@ -227,11 +229,11 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         }).values.tolist())
 
         chart_name_res = ['slowk(12, 5)', 'slowd(5)']
-
+        base_line = [50]
 
     print('Trade List : ')
     print(df_stock_val['trade'][df_stock_val['trade'] != 0.0])
-    return df_stock_val, chart_dat_res, chart_name_res
+    return df_stock_val, chart_dat_res, chart_name_res, base_line
 
 # 다음 에 해야함 패턴 인식을 통한 매매
 def getTradePointFromPatternRecorg(pattern_name, df):
@@ -258,8 +260,6 @@ def makeResultData(df_stock_val, balance):
     buyList = []
     sellList = []
 
-
-
     se_trade = df_stock_val['trade'][df_stock_val['trade'] != 0.0]
     if len(se_trade[se_trade == 2].index) == 0:
         return buyList, sellList, pd.Series(), pd.Series(), pd.Series()
@@ -277,22 +277,35 @@ def makeResultData(df_stock_val, balance):
     beforeIdx = first_buy_idx
     #for idx, value in se_trade.loc[first_buy_idx:].items():
     se_idx_list = se_trade.loc[first_buy_idx:].index
+    print(se_idx_list)
     for idx, realIdx in enumerate(se_idx_list):
 
         if idx == 0 or \
                 se_trade.loc[realIdx] == BUY and \
                 se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
-            print('buy', beforeIdx, realIdx)
+
             stock_count = math.floor(balance / df_stock_val.loc[realIdx].AdjClose)
             balance -= stock_count * df_stock_val.loc[realIdx].AdjClose
-
+            print('buy ', 'Before Trade IDX ', beforeIdx, 'Current Trade IDX: ', realIdx, 'Stock Price: ', df_stock_val.loc[realIdx].AdjClose,
+                  'Stock Count : ', stock_count, 'balance: ', balance)
             if idx == len(se_idx_list) - 1:
                 df_stock_val.loc[realIdx: , ['Balance', 'Asset', 'StockCount']] = \
                     balance, balance + (df_stock_val.loc[realIdx:]['AdjClose']* stock_count), stock_count
+                print('end BUY')
             else:
-                df_stock_val.loc[realIdx:se_idx_list[idx + 1], ['Balance', 'Asset', 'StockCount']] = \
-                    balance, balance + (df_stock_val.loc[realIdx:se_idx_list[idx + 1]]['AdjClose'] * stock_count), stock_count
+                next_idx = idx + 1
+                for remain_idx in range(idx+1, len(se_idx_list)):
+                    if se_trade.loc[se_idx_list[remain_idx]] == SELL:
+                        next_idx = remain_idx
+                        break
 
+                if remain_idx == len(se_idx_list):
+                    next_idx = len(se_idx_list) - 1
+
+
+                df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
+                    balance, balance + (df_stock_val.loc[realIdx:se_idx_list[next_idx]]['AdjClose'] * stock_count), stock_count
+                print('NOW BUY NEXT Trade IDX ', next_idx)
             buyList.append([
                 df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
                 df_stock_val.loc[realIdx].AdjClose
@@ -303,19 +316,30 @@ def makeResultData(df_stock_val, balance):
 
         elif se_trade.loc[realIdx] == SELL and \
                 se_trade.loc[beforeIdx] != se_trade.loc[realIdx]:
-            print('sell', beforeIdx, realIdx)
+
             stock_count = df_stock_val.loc[realIdx]['StockCount']
             balance += stock_count * df_stock_val.loc[realIdx].AdjClose
             asset = balance
             stock_count = 0
-
+            print('sell ', 'Before Trade IDX ', beforeIdx, 'Current Trade IDX: ', realIdx, 'Stock Price: ',
+                  df_stock_val.loc[realIdx].AdjClose, 'Stock Count : ', stock_count, 'balance: ', balance)
             if idx == len(se_idx_list) - 1:
                 df_stock_val.loc[realIdx:, ['Balance', 'Asset', 'StockCount']] = \
                     balance, asset, stock_count
+                print('end SELL')
             else:
-                df_stock_val.loc[realIdx:se_idx_list[idx + 1], ['Balance', 'Asset', 'StockCount']] = \
-                    balance, asset, stock_count
+                next_idx = idx + 1
+                for remain_idx in range(idx+1, len(se_idx_list)):
+                    if se_trade.loc[se_idx_list[remain_idx]] == BUY:
+                        next_idx = remain_idx
+                        break
 
+                if remain_idx == len(se_idx_list):
+                    next_idx = len(se_idx_list) - 1
+
+                df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
+                    balance, asset, stock_count
+                print('NOW SELL NEXT Trade IDX ', next_idx)
             sellList.append([
                 df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
                 df_stock_val.loc[realIdx].AdjClose
