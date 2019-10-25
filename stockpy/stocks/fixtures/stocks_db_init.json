@@ -17,7 +17,7 @@
       "tech_anal_name": "MACD",
       "code": 3,
       "tech_anal_full_name": "Moving Average Convergence Divergence",
-      "comment": "이평선들의 수렴 및 발산정도로 MACD Line 이 MACD Signal을 뚫고 올라가면 매수 신호 반대의 경우 매도 신호 fastperiod=12, slowperiod=26, signalperiod=9"
+      "comment": "매수조건: MACD 가 0 선 아래에 있고 MACD Signal 선을 상향 돌파시 \n매도조건: MACD 가 0 선 위에 있고 MACD Signal 선을 하향 돌파시 "
     }
   },
   {
@@ -27,7 +27,7 @@
       "tech_anal_name": "RSI",
       "code": 4,
       "tech_anal_full_name": "Relative Strength Index",
-      "comment": "RSI 70% 초과, RSI 가 시그널(RSI 6일 이동평균) 데드크로스 시 매도, RSI 30%미만 시그널을 사용돌파시 매수"
+      "comment": "매수조건: RSI 30% 이하\n매도조건: RSI 70% 이상"
     }
   },
   {
@@ -37,7 +37,7 @@
       "tech_anal_name": "STOCH",
       "code": 5,
       "tech_anal_full_name": "Stochastic",
-      "comment": "%K 가 %D 를 돌파할 때 매수 반대의 경우 매도 "
+      "comment": "매수조건: %d 가 30% 이하에서 %k 가 %d 를 상향 돌파시 \n매도조건: %d 가 70% 이상에서 %k 가 %d 를 하향 돌파시 "
     }
   }
 ]

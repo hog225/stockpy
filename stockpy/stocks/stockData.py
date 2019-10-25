@@ -161,6 +161,44 @@ def getStockValueFromNaver(stock_code, reqtype, count= 14531, date=None):
 
     return df_org
 
+def getGoldDeadPosition(se_line1, se_line2):
+    se_signal = np.sign(se_line1 - se_line2)
+    se_signal[se_signal == 0] = 1
+    se_signal = se_signal - se_signal.shift()
+    # 2, -2 로 구성된 시리즈
+    return se_signal
+
+def getGoldDeadLineBoundaryPosition(se_signal, base_signal, buy_line, sell_line):
+    # slowd 중 기준라인 사이의 값은 영으로 만든다
+    if buy_line != sell_line:
+        se_signal.loc[(base_signal > buy_line) & (base_signal < sell_line)] = 0
+        # BUY LINE 밑에있는 매도 신호는 지운다
+        se_signal[(base_signal <= buy_line) & (base_signal != 0) & (se_signal == -2)] = 0
+        # SELL LINE 위에 있는 매수 신호는 지운다 .
+        se_signal[(base_signal >= sell_line) & (base_signal != 0) & (se_signal == 2)] = 0
+    else:
+        se_signal[(base_signal <= buy_line) & (base_signal != 0) & (se_signal == -2)] = 0
+        # SELL LINE 위에 있는 매수 신호는 지운다 .
+        se_signal[(base_signal > sell_line) & (base_signal != 0) & (se_signal == 2)] = 0
+
+    se_signal[np.isnan(se_signal)] = 0.0
+    # testDf = pd.DataFrame({'A':se_signal, 'B':slowd, 'C':tmp_se_signal})
+    return se_signal
+
+
+def makeChartData(df_stock_val, signals, names):
+    chart_dat_res = []
+    chart_name_res = []
+    for sig in signals:
+        chart_dat_res.append(pd.DataFrame({
+            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")),
+            'AdjClose': sig.where(pd.notnull(sig), None)
+        }).values.tolist())
+
+
+    chart_name_res = names
+    return chart_dat_res, chart_name_res
+
 def getTradePointFromMomentum(tech_anal_code, df_stock_val):
     chart_dat_res = []
     chart_name_res = []
@@ -173,24 +211,37 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
     # MACD
     elif tech_anal_code == MACD:
         se_macd, se_macdsignal, se_macdhist = TA.MACD(df_stock_val.AdjClose, fastperiod=12, slowperiod=26, signalperiod=9)
-        se_signal = np.sign(se_macd - se_macdsignal)
-        se_signal = se_signal - se_signal.shift()
-        se_signal[np.isnan(se_signal)] = 0.0
+        # se_signal = np.sign(se_macd - se_macdsignal)
+        # se_signal = se_signal - se_signal.shift()
+        # se_signal[np.isnan(se_signal)] = 0.0
+        se_macd = se_macd.round(2)
+        se_macdsignal = se_macdsignal.round(2)
+        tmpd = se_macd.copy()
+
+        # MACD 가 Sig
+        se_signal = getGoldDeadPosition(se_macd, se_macdsignal)
+        se_signal = getGoldDeadLineBoundaryPosition(se_signal, tmpd, 0, 0)
+
         df_stock_val['trade'] = se_signal
         # -2.0 DeadCross 2.0 GoldCross SELL, BUY
 
-        # make chart data
-        chart_dat_res.append(pd.DataFrame({
-            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macd.where(pd.notnull(se_macd), None)
-        }).values.tolist())
-
-        chart_dat_res.append(pd.DataFrame({
-            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': se_macdsignal.where(pd.notnull(se_macdsignal), None)
-        }).values.tolist())
-
-        chart_name_res = ['MACD(12, 26)', 'MACD Signal(9)']
+        chart_dat_res, chart_name_res = makeChartData(df_stock_val, [se_macd, se_macdsignal], ['MACD(12, 26)', 'MACD Signal(9)'])
         base_line = [0]
+    elif tech_anal_code == RSI:
+        real = TA.RSI(df_stock_val.AdjClose, timeperiod=14)
+        se_30_sig = getGoldDeadPosition(real, 30)
+        se_30_sig[se_30_sig == 2] = 0
+        se_30_sig[se_30_sig == -2] = 2
 
+        se_70_sig = getGoldDeadPosition(real, 70)
+        se_70_sig[se_70_sig == -2] = 0
+        se_30_sig[se_70_sig == 2] = -2
+
+        se_signal = se_30_sig + se_70_sig
+        df_stock_val['trade'] = se_signal
+        chart_dat_res, chart_name_res = makeChartData(df_stock_val, [real],
+                                                      ['RSI(14)'])
+        base_line = [50]
     # STHOCH
     elif tech_anal_code == STOCH:
         SELL_LINE = 70
@@ -202,33 +253,14 @@ def getTradePointFromMomentum(tech_anal_code, df_stock_val):
         slowd = slowd.round(2)
         tmpd = slowd.copy()
 
-        se_signal = np.sign(slowk-slowd)
-        se_signal[se_signal==0] = 1
-        se_signal = se_signal - se_signal.shift()
-        #tmp_se_signal = se_signal.copy()
+        se_signal = getGoldDeadPosition(slowk, slowd)
 
         # Slow D 가 25% 이하에서 %K 가 %d 를 상향 돌파시 매수
         # Slow D 가 75% 이상에서 %K 가 %d 를 하향 돌파시 매도
-
-        # slowd 중 기준라인 사이의 값은 영으로 만든다
-        se_signal.loc[(tmpd > BUY_LINE) & (tmpd < SELL_LINE)] = 0
-        # BUY LINE 밑에있는 매도 신호는 지운다
-        se_signal[(tmpd <= BUY_LINE) & (tmpd != 0) & (se_signal == -2)] = 0
-        # BUY LINE 위에 있는 매수 신호는 지운다 .
-        se_signal[(tmpd >= SELL_LINE) & (tmpd != 0) & (se_signal == 2)] = 0
-        se_signal[np.isnan(se_signal)] = 0.0
-        #testDf = pd.DataFrame({'A':se_signal, 'B':slowd, 'C':tmp_se_signal})
+        se_signal= getGoldDeadLineBoundaryPosition(se_signal, tmpd, BUY_LINE, SELL_LINE)
         df_stock_val['trade'] = se_signal
 
-        chart_dat_res.append(pd.DataFrame({
-            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': slowk.where(pd.notnull(slowk), None)
-        }).values.tolist())
-
-        chart_dat_res.append(pd.DataFrame({
-            'Date': df_stock_val['Date'].apply(lambda x: x.strftime("%Y-%m-%d")), 'AdjClose': slowd.where(pd.notnull(slowd), None)
-        }).values.tolist())
-
-        chart_name_res = ['slowk(12, 5)', 'slowd(5)']
+        chart_dat_res, chart_name_res = makeChartData(df_stock_val, [slowk, slowd], ['slowk(12, 5)', 'slowd(5)'])
         base_line = [50]
 
     print('Trade List : ')
@@ -299,12 +331,14 @@ def makeResultData(df_stock_val, balance):
                         next_idx = remain_idx
                         break
 
-                if remain_idx == len(se_idx_list):
-                    next_idx = len(se_idx_list) - 1
+                if remain_idx == len(se_idx_list)-1:
+                    df_stock_val.loc[realIdx:, ['Balance', 'Asset', 'StockCount']] = \
+                        balance, balance + (df_stock_val.loc[realIdx:][
+                                                'AdjClose'] * stock_count), stock_count
 
-
-                df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
-                    balance, balance + (df_stock_val.loc[realIdx:se_idx_list[next_idx]]['AdjClose'] * stock_count), stock_count
+                else:
+                    df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
+                        balance, balance + (df_stock_val.loc[realIdx:se_idx_list[next_idx]]['AdjClose'] * stock_count), stock_count
                 print('NOW BUY NEXT Trade IDX ', next_idx)
             buyList.append([
                 df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
@@ -334,11 +368,12 @@ def makeResultData(df_stock_val, balance):
                         next_idx = remain_idx
                         break
 
-                if remain_idx == len(se_idx_list):
-                    next_idx = len(se_idx_list) - 1
-
-                df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
-                    balance, asset, stock_count
+                if remain_idx == len(se_idx_list) - 1:
+                    df_stock_val.loc[realIdx:, ['Balance', 'Asset', 'StockCount']] = \
+                        balance, asset, stock_count
+                else:
+                    df_stock_val.loc[realIdx:se_idx_list[next_idx], ['Balance', 'Asset', 'StockCount']] = \
+                        balance, asset, stock_count
                 print('NOW SELL NEXT Trade IDX ', next_idx)
             sellList.append([
                 df_stock_val.loc[realIdx].Date.strftime("%Y-%m-%d"),
