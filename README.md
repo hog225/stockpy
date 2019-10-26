@@ -1,13 +1,20 @@
 # Environment
     Ubuntu 18.04.3 LTS, python 3.6.8, Django
-    Make virtualenv : python3 -m venv spvenv
+    Make virtualenv : python3 -m venv spvenv, python3.6 -m venv spvenv
     Run Virtualenv : . activeVenv.sh (source spvenv/bin/activate)
     insall Package : pip install -r requirements.txt
     make config.cfg and edit
     APP DB:
         - python manage.py makemigrations stocks
     DB Commit: python manage.py migrate
-    APP DB Init: python manage.py loaddata stocks_db_init.json 
+    APP DB Init: python manage.py loaddata stocks_db_init.json
+
+    install python3.6 on Ubuntu 16.04 LTS
+        sudo add-apt-repository ppa:jonathonf/python-3.6
+        sudo apt-get update
+        sudo apt-get install python3.6
+        sudo apt-get install python3.6-venv
+
     
     
 # Django
@@ -34,6 +41,11 @@
     create database stock_py  #create database
     DB BackUp : mysql [dbname] -u [username] -p[password] -N -e 'show tables like "bak\_%"' | xargs mysqldump [dbname] -u [username] -p[password] > [dump_file] 
     DB Restore : mysql -u [사용자 계정] -p [패스워드] [복원할 DB] < [백업된 DB].sql
+
+    Wordpress bitnami version
+    + apt-get install mysql-client
+    + 접속 : mysql --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
+    + export PATH=$PATH:[파일이 있는 패스]/mysql/bin
     
 # Integration MariaDB
     - pip install mysqlclient, configparser
