@@ -9,12 +9,6 @@
     DB Commit: python manage.py migrate
     APP DB Init: python manage.py loaddata stocks_db_init.json
 
-    install python3.6 on Ubuntu 16.04 LTS
-        sudo add-apt-repository ppa:jonathonf/python-3.6
-        sudo apt-get update
-        sudo apt-get install python3.6
-        sudo apt-get install python3.6-venv
-
     
     
 # Django
@@ -42,13 +36,6 @@
     DB BackUp : mysql [dbname] -u [username] -p[password] -N -e 'show tables like "bak\_%"' | xargs mysqldump [dbname] -u [username] -p[password] > [dump_file] 
     DB Restore : mysql -u [사용자 계정] -p [패스워드] [복원할 DB] < [백업된 DB].sql
 
-    Wordpress bitnami version
-    + 워드프레스 MYSQL 은 워드프레스 폴더에 있음
-    + apt-get install mysql-client
-    + 접속 : mysql --socket=[파일 패스]/wordpress-5.2.4-0/mysql/tmp/mysql.sock
-    + mysql root password : mysqladmin -p -u root password [비밀번호] --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
-    + PATH 설정 : export PATH=$PATH:/home/[PATH]/wordpress-5.2.4-0/mysql/bin/ - ~/.profile에 저장
-    + sudo apt-get install python3.6-dev <= 이거 설치 해야 python mysqlclient 설치됨 
     
 # Integration MariaDB
     - pip install mysqlclient, configparser
@@ -76,3 +63,52 @@
     5. pip install TA-Lib     
     
     
+# Bitnami Wordpress 연동
+## Python 3.6 install on Ubuntu 16.04
+    # environment: Amazone light sail/ ubuntu 16.04 LTS/ bitnami amp 
+    sudo add-apt-repository ppa:jonathonf/python-3.6
+    sudo apt-get update
+    sudo apt-get install python3.6
+    sudo apt-get install python3.6-venv
+
+## DB Setting
+    + 워드프레스 MYSQL 은 워드프레스 폴더에 있음
+    + apt-get install mysql-client
+    + 접속 : mysql --socket=[파일 패스]/wordpress-5.2.4-0/mysql/tmp/mysql.sock
+    + mysql root password : mysqladmin -p -u root password [비밀번호] --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
+    + PATH 설정 : export PATH=$PATH:/home/[PATH]/wordpress-5.2.4-0/mysql/bin/ - ~/.profile에 저장
+    + sudo apt-get install python3.6-dev <= 이거 설치 해야 python mysqlclient 설치됨 
+    
+## Apache Setting
+    Version: Apache/2.4.37 (Unix)
+    sudo apt-get install libapache2-mod-wsgi-py3
+    sudo vim /etc/apache2/ports.conf -> Listen 8000 추가
+    sudo vim /etc/apache2/sites-enabled/000-default.conf -> 아래처럼 입력
+    <VirtualHost *:8000>
+
+        ServerAdmin master@localhost
+        DocumentRoot /var/www/html
+        # Collectstatic 해야함 media도 필요하면 추가
+        Alias /static/ /home/yghong/stockpy/stockpy/stockpy/static/  
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+        <Directory /home/yghong/stockpy/stockpy/stockpy/static>
+                Require all granted
+        </Directory>
+
+        <Directory /home/yghong/stockpy/stockpy/stockpy/stockpy/> # wsgi.py 가 있어야함
+                <Files wsgi.py>
+                        Require all granted
+                </Files>
+        </Directory>
+        # python-path: manage.py 가 있어야함, python-home: spvenv(가상환경 폴더 지정)
+        WSGIDaemonProcess stockpy python-path=/home/yghong/stockpy/stockpy/stockpy python-home=/home/yghong/stockpy/stockpy/spvenv
+        WSGIProcessGroup stockpy
+        WSGIScriptAlias / /home/yghong/stockpy/stockpy/stockpy/stockpy/wsgi.py
+
+    </VirtualHost>
+    python manage.py collectstatic (코드상에 {% static "path"%} 이렇게 안할시 에러 발생위험)
+    sudo service apache2 restart -> Django 서버가 실행됨 
+

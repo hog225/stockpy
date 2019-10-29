@@ -34,7 +34,7 @@ config.read(configFile)
 SECRET_KEY = '%9i^ze1b#8r-$nk=#v=)4v1g$+whbmkmlyt$*$5hwn57j&e&fg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(config['server']['debug'])
 
 ALLOWED_HOSTS = ['*']
 
