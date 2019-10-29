@@ -43,9 +43,12 @@
     DB Restore : mysql -u [사용자 계정] -p [패스워드] [복원할 DB] < [백업된 DB].sql
 
     Wordpress bitnami version
+    + 워드프레스 MYSQL 은 워드프레스 폴더에 있음
     + apt-get install mysql-client
-    + 접속 : mysql --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
-    + export PATH=$PATH:[파일이 있는 패스]/mysql/bin
+    + 접속 : mysql --socket=[파일 패스]/wordpress-5.2.4-0/mysql/tmp/mysql.sock
+    + mysql root password : mysqladmin -p -u root password [비밀번호] --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
+    + PATH 설정 : export PATH=$PATH:/home/[PATH]/wordpress-5.2.4-0/mysql/bin/ - ~/.profile에 저장
+    + sudo apt-get install python3.6-dev <= 이거 설치 해야 python mysqlclient 설치됨 
     
 # Integration MariaDB
     - pip install mysqlclient, configparser

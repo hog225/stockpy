@@ -27,11 +27,15 @@ class techAnalWidget(forms.Select):
 class StockInfoSelectForm(forms.Form):
     market_name = forms.ModelChoiceField(queryset=Market.objects.all(), label=mark_safe('<strong>Market</strong>'))
 
-    if TechAnal.objects.all().count() > 0:
-        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'),
-                                                required=False, initial=1, widget=techAnalWidget)
-    else:
-        tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False)
+    # try 안하면 초기 Django Model 생성시 에러 발생
+    try:
+        if TechAnal.objects.all().count() > 0:
+            tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'),
+                                                    required=False, initial=1, widget=techAnalWidget)
+        else:
+            tech_anal_name = forms.ModelChoiceField(queryset=TechAnal.objects.all(), label=mark_safe('<strong>Technical analysis</strong>'), required=False)
+    except:
+        pass
 
     start_date = forms.DateTimeField(
         input_formats=['%Y/%m/%d'],
