@@ -78,8 +78,51 @@
     + mysql root password : mysqladmin -p -u root password [비밀번호] --socket=/home/yghong/wordpress-5.2.4-0/mysql/tmp/mysql.sock
     + PATH 설정 : export PATH=$PATH:/home/[PATH]/wordpress-5.2.4-0/mysql/bin/ - ~/.profile에 저장
     + sudo apt-get install python3.6-dev <= 이거 설치 해야 python mysqlclient 설치됨 
+
+## Apache Setting(bitnami)
     
-## Apache Setting
+    참고
+    https://docs.bitnami.com/oci/infrastructure/django/get-started/deploy-django-project/
+    
+    sudo apt-get install libapache2-mod-wsgi-py3
+    vim /opt/bitnami/apache2/conf/httpd.conf
+    LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so - 요 내용 추가 
+    
+    cd /home/bitnami/labapp/stockpy/stockpy/stockpy // wsgi.py 가 있는 디렉토리
+    mkdir conf > cd conf
+    touch httpd-prefix.conf
+    touch httpd-app.conf
+    아래 내용 처럼 httpd-prefix, httpd-app 수정
+    /opt/bitnami/apache2/conf/bitnami/bitnami-apps-prefix.conf 열어서 아래 내용 추가
+    > Include "/home/bitnami/labapp/stockpy/stockpy/stockpy/conf/httpd-prefix.conf"
+    sudo /opt/bitnami/ctlscript.sh restart apache    
+    
+### httpd-app.conf
+    <IfDefine !IS_DJANGOSTACK_LOADED>
+        Define IS_DJANGOSTACK_LOADED
+        WSGIDaemonProcess stockpy python-path=/home/bitnami/labapp/stockpy/stockpy python-home=/home/bitnami/labapp/stockpy/spvenv
+    </IfDefine>
+    
+    <Directory "/home/bitnami/labapp/stockpy/stockpy/stockpy/stockpy">
+        Options +MultiViews
+        AllowOverride All
+        <IfVersion >= 2.3>
+    Require all granted
+        </IfVersion>
+        WSGIProcessGroup stockpy
+    
+    WSGIApplicationGroup %{GLOBAL}
+    
+    </Directory>
+    
+    
+    Alias /static/ "/home/bitnami/labapp/stockpy/stockpy/static"
+    WSGIScriptAlias /stockpy '/home/bitnami/labapp/stockpy/stockpy/stockpy/wsgi.py'
+
+### httpd-prefix.conf
+    Include "/home/bitnami/labapp/stockpy/stockpy/stockpy/conf/httpd-app.conf"
+    
+## Apache Setting(일반 Apache)
     Version: Apache/2.4.37 (Unix)
     sudo apt-get install libapache2-mod-wsgi-py3
     sudo vim /etc/apache2/ports.conf -> Listen 8000 추가
