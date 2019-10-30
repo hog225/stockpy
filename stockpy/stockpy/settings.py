@@ -143,5 +143,4 @@ if config['server']['url_app'] != '/':
     STATIC_URL = config['server']['url_app'] + '/static/'
 else:
     STATIC_URL = '/static/'
-print(STATIC_URL)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
