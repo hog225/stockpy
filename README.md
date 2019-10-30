@@ -79,14 +79,15 @@
     + PATH 설정 : export PATH=$PATH:/home/[PATH]/wordpress-5.2.4-0/mysql/bin/ - ~/.profile에 저장
     + sudo apt-get install python3.6-dev <= 이거 설치 해야 python mysqlclient 설치됨
     + ROOt 초기화 https://docs.bitnami.com/aws/apps/processmakerenterprise/administration/change-reset-password/
-    
+## Apache Setting(bitnami)    
     참고
     https://docs.bitnami.com/oci/infrastructure/django/get-started/deploy-django-project/
-    
-    sudo apt-get install libapache2-mod-wsgi-py3
-    vim /opt/bitnami/apache2/conf/httpd.conf
-    LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so - 요 내용 추가 
-    
+    vim /opt/bitnami/apache2/bin/apxs
+        #!/bin/perl -w to #!/usr/bin/perl -w  
+    가상환경 Enable > pip install mod_wsgi
+    mod_wsgi-express module-config 출력된 내용을 아래 파일에 붙혀 넣음 
+        /opt/bitnami/apache2/conf/httpd.conf
+     
     cd /home/bitnami/labapp/stockpy/stockpy/stockpy // wsgi.py 가 있는 디렉토리
     mkdir conf > cd conf
     touch httpd-prefix.conf
@@ -101,22 +102,26 @@
         Define IS_DJANGOSTACK_LOADED
         WSGIDaemonProcess stockpy python-path=/home/bitnami/labapp/stockpy/stockpy python-home=/home/bitnami/labapp/stockpy/spvenv
     </IfDefine>
+            <Directory /home/bitnami/labapp/stockpy/stockpy/static>
+                    Require all granted
+            </Directory>
+    
+    <Directory "/home/bitnami/labapp/stockpy/stockpy/stockpy">
+        <Files "wsgi.py">
+            Require all granted
+        </Files>
+    </Directory>
     
     <Directory "/home/bitnami/labapp/stockpy/stockpy/stockpy/stockpy">
         Options +MultiViews
         AllowOverride All
-        <IfVersion >= 2.3>
-    Require all granted
-        </IfVersion>
+        Require all granted
         WSGIProcessGroup stockpy
-    
-    WSGIApplicationGroup %{GLOBAL}
-    
+        WSGIApplicationGroup %{GLOBAL}
     </Directory>
     
-    
-    Alias /static/ "/home/bitnami/labapp/stockpy/stockpy/static"
-    WSGIScriptAlias /stockpy '/home/bitnami/labapp/stockpy/stockpy/stockpy/wsgi.py'
+    Alias /stockpy/static "/home/bitnami/labapp/stockpy/stockpy/static"
+    WSGIScriptAlias /stockpy /home/bitnami/labapp/stockpy/stockpy/stockpy/wsgi.py
 
 ### httpd-prefix.conf
     Include "/home/bitnami/labapp/stockpy/stockpy/stockpy/conf/httpd-app.conf"
