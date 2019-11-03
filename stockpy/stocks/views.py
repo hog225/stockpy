@@ -11,6 +11,10 @@ from .stockData import *
 import datetime
 from django.template import loader, RequestContext
 import re
+import configparser
+import os
+from django.conf import settings
+
 
 def convertORMtoStockValueDataFrame(orm_obj):
     df_org = pd.DataFrame(columns=['Date', 'Open', 'High', 'Low', 'Close', 'AdjClose', 'Volume'])
@@ -122,7 +126,7 @@ def if_i_bought_main(request):
 
     else:
         form = StockInfoSelectForm()
-        return render(request, 'stocks/if_i_bought_main.html', {'form' : form})
+        return render(request, 'stocks/if_i_bought_main.html', {'form' : form, 'adsenseUsage':settings.ADSENSE_USAGE})
 
 @checkTime
 def saveStockValue(stock_obj, last_date_on_db=None):
