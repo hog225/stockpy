@@ -174,7 +174,7 @@
 
             $(".stockNameAutoComplete").autocomplete({
                 source: function(request, response) {
-                    $.getJSON("/stocks/stock-name-autocomplete", { q: request.term , s: $("#id_market_name").val()}, response);
+                    $.getJSON("{% url 'stock-name-autocomplete' %}", { q: request.term , s: $("#id_market_name").val()}, response);
                 },
                 select: function(event, ui) {
                     console.log(ui.item);
