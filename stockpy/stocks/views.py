@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from .forms import StockInfoSelectForm
 from .models import Stock, Market, StockValue
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 #from dal import autocomplete
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -235,11 +236,11 @@ def initStockData(request):
             saveStockValue(stock_obj)
 
 
-        return redirect('/stocks/if-i-bought')
+        return redirect(reverse('if_i_bought_main'))
 
 
 
-    return redirect('/stocks/index')
+    return redirect(reverse('index'))
 
 @login_required
 def updateMarket(request):
@@ -251,7 +252,7 @@ def updateMarket(request):
     #
 
 
-    return redirect('/stocks/index')
+    return redirect(reverse('index'))
 
 
 @login_required
