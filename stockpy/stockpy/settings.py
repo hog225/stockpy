@@ -31,7 +31,7 @@ ADSENSE_USAGE = int(config['server']['adsense'])
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%9i^ze1b#8r-$nk=#v=)4v1g$+whbmkmlyt$*$5hwn57j&e&fg'
+SECRET_KEY = '----------'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(config['server']['debug'])
