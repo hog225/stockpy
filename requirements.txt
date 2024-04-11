@@ -9,7 +9,7 @@ django-crispy-forms==1.7.2
 django-money==0.15.1
 django-widget-tweaks==1.4.5
 html5lib==1.0.1
-idna==2.8
+idna==3.7
 lxml==4.4.1
 mysqlclient==1.4.4
 numpy==1.17.2
