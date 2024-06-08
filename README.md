@@ -1,3 +1,4 @@
+https://lifeonroom.com/stockpy/stocks/if-i-bought/#
 # Environment
     Ubuntu 18.04.3 LTS, python 3.6.8, Django
     Make virtualenv : python3 -m venv spvenv, python3.6 -m venv spvenv
